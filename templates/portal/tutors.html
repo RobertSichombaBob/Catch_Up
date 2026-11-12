@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Verified tutors · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head"><span class="eyebrow"><svg class="icon"><use href="#i-shield"/></svg>Every teacher is verified</span><h1>Find your tutor</h1>
+    <p class="lead">TCZ-registered, degree-qualified teachers who specialise in what they teach.</p></div>
+  <div class="filters">
+    <a href="?" class="chip {% if not subject %}active{% endif %}">All subjects</a>
+    {% for s in subjects %}<a href="?subject={{ s.slug }}" class="chip {% if s.slug == subject %}active{% endif %}">{{ s.name }}</a>{% endfor %}
+  </div>
+  <div class="grid grid-3" style="margin-bottom:64px">
+    {% for t in tutors %}
+    <a href="{% url 'portal:tutor_profile' t.pk %}" class="card card-hover tutor-card" data-reveal>
+      {% if t.photo %}<img src="{{ t.photo.url }}" alt="" class="avatar avatar-img" style="width:72px;height:72px;margin:0 auto 12px">{% else %}<span class="avatar">{{ t.initials }}</span>{% endif %}
+      <h3>{{ t.display_name }} <svg class="icon verified" aria-label="Verified"><use href="#i-shield"/></svg></h3>
+      <p class="muted small">{{ t.headline }}</p>
+      <div class="row" style="justify-content:center;gap:6px">{% for s in t.tutor_profile.specialisations.all %}<span class="badge" style="background:{{ s.colour }}1a;color:{{ s.colour }}">{{ s.name }}</span>{% endfor %}</div>
+      <p class="small muted" style="margin-top:10px">{{ t.tutor_profile.get_qualification_display }} · {{ t.tutor_profile.years_experience }} yrs · {{ t.course_count }} course{{ t.course_count|pluralize }}</p>
+    </a>
+    {% empty %}<div class="card empty"><p>No verified tutors match yet.</p></div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

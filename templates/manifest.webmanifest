@@ -1,0 +1,10 @@
+{% load static %}{
+  "name": "Catch Up",
+  "short_name": "Catch Up",
+  "description": "A-level and university courses with expert tutors.",
+  "start_url": "/dashboard/",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#0e7a4f",
+  "icons": [{"src": "{% static 'img/logo.svg' %}", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]
+}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Gradebook · {{ course.title }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container wide">
+  <div class="page-head row-between">
+    <div><a href="{% url 'classroom:manage' course.slug %}" class="small">&larr; {{ course.title }}</a><h1>Gradebook</h1><p class="muted">Best marked attempt per assessment, weighted by each assessment's weight.</p></div>
+    <a class="btn btn-outline" href="?format=csv"><svg class="icon"><use href="#i-download"/></svg>Download CSV</a>
+  </div>
+  <div class="card table-wrap">
+    <table class="table compact">
+      <thead><tr><th>Student</th>{% for a in assessments %}<th title="{{ a.title }}">{{ a.title|truncatechars:18 }}<div class="muted small">{{ a.weight }}%</div></th>{% endfor %}<th>Average</th><th>Grade</th><th>Attendance</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><strong>{{ r.student.display_name }}</strong><div class="muted small">{{ r.student.email }}</div></td>
+          {% for s in r.scores %}<td>{% if s is None %}<span class="muted">–</span>{% else %}{{ s|floatformat:"-1" }}{% endif %}</td>{% endfor %}
+          <td><strong>{% if r.average is None %}–{% else %}{{ r.average }}%{% endif %}</strong></td>
+          <td><span class="grade-pill grade-{{ r.grade|default:'na'|slugify }}">{{ r.grade|default:"–" }}</span></td>
+          <td>{% if r.attendance is None %}–{% else %}{{ r.attendance }}%{% endif %}</td>
+        </tr>
+        {% empty %}<tr><td colspan="{{ assessments|length|add:4 }}" class="muted">No students enrolled yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

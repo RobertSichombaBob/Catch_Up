@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}{{ school.name }} · Catch Up{% endblock %}
+{% block content %}
+<section class="profile-hero school-hero">
+  <div class="container">
+    <div class="row" style="gap:18px;align-items:center;flex-wrap:wrap">
+      {% if school.logo %}<img src="{{ school.logo.url }}" alt="" class="school-logo lg">{% else %}<span class="school-logo school-initial lg">{{ school.name|first }}</span>{% endif %}
+      <div style="flex:1;min-width:220px">
+        <span class="eyebrow">{{ school.get_kind_display }}{% if school.town %} · {{ school.town }}{% endif %}{% if school.province %}, {{ school.province }}{% endif %}</span>
+        <h1>{{ school.name }}</h1>
+        <p class="muted" style="margin:0">{{ teachers|length }} staff · {{ counts.student|default:0 }} students{% if not school.is_approved %} · <span class="badge badge-warning">Awaiting review</span>{% endif %}</p>
+      </div>
+      <div class="row">
+        {% if member.role == 'admin' or staff %}<a class="btn btn-primary" href="{% url 'schools:manage' school.slug %}"><svg class="icon"><use href="#i-settings"/></svg>Manage school</a>{% endif %}
+        {% if member.role == 'teacher' or member.role == 'admin' %}<a class="btn btn-outline" href="{% url 'courses:new_course' %}?school={{ school.slug }}"><svg class="icon"><use href="#i-plus"/></svg>New course</a>{% endif %}
+        {% if not member %}<a class="btn btn-outline" href="{% url 'schools:index' %}#join">Join with a code</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container section-sm">
+  {% if school.about %}<p class="lead" style="max-width:760px">{{ school.about }}</p>{% endif %}
+  <div class="dash-grid">
+    <div>
+      <h2 class="card-title">Courses</h2>
+      <div class="grid grid-2">{% for course in courses %}{% include 'partials/course_card.html' %}{% empty %}<p class="muted">No courses published yet.</p>{% endfor %}</div>
+    </div>
+    <div>
+      <div class="card card-pad">
+        <h3 class="card-title"><svg class="icon"><use href="#i-calendar"/></svg>Coming up</h3>
+        <ul class="session-list">{% for s in sessions %}<li><span class="date-chip"><b>{{ s.starts_at|date:"j" }}</b>{{ s.starts_at|date:"M" }}</span><span class="file-main">{% if member %}<a href="{{ s.get_absolute_url }}"><strong>{{ s.title }}</strong></a>{% else %}<strong>{{ s.title }}</strong>{% endif %}<span class="muted small">{{ s.course.title }} · {{ s.starts_at|time:"H:i" }}</span></span></li>{% empty %}<li class="muted small">Nothing scheduled.</li>{% endfor %}</ul>
+      </div>
+      <div class="card card-pad" style="margin-top:20px">
+        <h3 class="card-title"><svg class="icon"><use href="#i-users"/></svg>Teachers</h3>
+        <ul class="plain-list">{% for t in teachers %}<li><span>{{ t.user.display_name }}{% if t.user.is_verified_tutor %} <span class="verified" title="Verified teacher"><svg class="icon"><use href="#i-check-circle"/></svg></span>{% endif %}</span><span class="muted small">{{ t.get_role_display }}</span></li>{% empty %}<li class="muted small">No teachers yet.</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

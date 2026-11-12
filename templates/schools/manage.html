@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ school.name }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container wide">
+  <div class="page-head row-between">
+    <div><a href="{{ school.get_absolute_url }}" class="small">&larr; {{ school.name }}</a><h1>School dashboard</h1><p class="muted">{{ school.get_plan_display }} plan{% if not school.is_approved %} · awaiting review by Catch Up (everything works meanwhile){% endif %}</p></div>
+    <a class="btn btn-primary" href="{% url 'courses:new_course' %}?school={{ school.slug }}"><svg class="icon"><use href="#i-plus"/></svg>New school course</a>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><span class="sub">Students</span><strong>{{ counts.student|default:0 }}</strong></div>
+    <div class="kpi"><span class="sub">Teachers</span><strong>{{ counts.teacher|default:0 }}</strong></div>
+    <div class="kpi"><span class="sub">Administrators</span><strong>{{ counts.admin|default:0 }}</strong></div>
+    <div class="kpi"><span class="sub">Courses</span><strong>{{ courses|length }}</strong></div>
+  </div>
+  <div class="dash-grid" style="margin-top:20px">
+    <div class="card">
+      <div class="card-pad row-between" style="padding-bottom:0">
+        <h3 class="card-title" style="margin:0">Members</h3>
+        <div class="row small">{% for value, label in roles %}<a class="chip{% if role == value %} active{% endif %}" href="?role={{ value }}">{{ label }}</a>{% endfor %}{% if role %}<a class="chip" href="?">All</a>{% endif %}</div>
+      </div>
+      <div class="table-wrap"><table class="table compact">
+        <thead><tr><th>Name</th><th>Role</th><th>Class</th><th>Courses</th><th>Attendance</th><th></th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td><strong>{{ r.m.user.display_name }}</strong><div class="muted small">{{ r.m.user.email }}</div></td>
+            <td>{{ r.m.get_role_display }}</td><td class="small">{{ r.m.class_name|default:"–" }}</td><td>{{ r.courses }}</td>
+            <td>{% if r.attendance is None %}–{% else %}{{ r.attendance }}%{% endif %}</td>
+            <td>{% if r.m.user != request.user %}
+              <form method="post" action="{% url 'schools:member_update' school.slug r.m.pk %}" class="row" style="gap:6px">{% csrf_token %}
+                <select name="action" class="input input-sm" aria-label="Change role">{% for value, label in roles %}<option value="{{ value }}"{% if r.m.role == value %} selected{% endif %}>{{ label }}</option>{% endfor %}<option value="remove">Remove</option></select>
+                <button class="btn btn-sm btn-outline">Save</button>
+              </form>{% endif %}</td>
+          </tr>
+          {% empty %}<tr><td colspan="6" class="muted">No members yet. Share the join codes.</td></tr>{% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+    <div>
+      <div class="card card-pad">
+        <h3 class="card-title"><svg class="icon"><use href="#i-link"/></svg>Join codes</h3>
+        <p class="muted small">People sign up, open <a href="{{ join_url }}">{{ join_url }}</a> and enter a code.</p>
+        <div class="code-display"><span class="muted small">Teachers</span><strong>{{ school.teacher_code }}</strong></div>
+        <div class="code-display"><span class="muted small">Students</span><strong>{{ school.student_code }}</strong></div>
+        <form method="post" action="{% url 'schools:new_codes' school.slug %}" data-confirm="Create new codes? The old ones stop working.">{% csrf_token %}<button class="btn btn-ghost btn-sm">Create new codes</button></form>
+      </div>
+      <div class="card card-pad" style="margin-top:20px">
+        <h3 class="card-title"><svg class="icon"><use href="#i-book"/></svg>School courses</h3>
+        <ul class="plain-list">{% for c in courses %}<li><a href="{% url 'courses:studio' c.slug %}">{{ c.title }}</a><span class="muted small">{{ c.tutor.display_name }}{% if not c.is_published %} · draft{% endif %}</span></li>{% empty %}<li class="muted small">No courses yet. Teachers who joined with the teacher code can create them.</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

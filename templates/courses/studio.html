@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Studio: {{ course.title }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between">
+    <div><a href="{% url 'core:tutor_dashboard' %}" class="small">&larr; Tutor studio</a><h1>{{ course.title }}</h1>
+      <span class="muted small">{{ course.subject.name }} · K{{ course.price|floatformat:0 }}/month · {% if course.is_published %}<span class="badge badge-brand">Published</span>{% else %}<span class="badge">Draft</span>{% endif %}</span></div>
+    <div class="row">
+      <a href="{% url 'courses:edit_course' course.slug %}" class="btn btn-outline"><svg class="icon"><use href="#i-edit"/></svg>Details</a>
+      <a href="{% url 'classroom:manage' course.slug %}" class="btn btn-outline"><svg class="icon"><use href="#i-users"/></svg>Classes and grading</a>
+      <a href="{{ course.get_absolute_url }}" class="btn btn-ghost">View page</a>
+    </div>
+  </div>
+  <div class="tabs" data-tabs>
+    <button class="tab active" data-tab="lessons">Lessons</button>
+    <button class="tab" data-tab="files">Files ({{ materials|length }})</button>
+    <button class="tab" data-tab="students">Students ({{ active_count }})</button>
+  </div>
+
+  <section class="tab-panel active" data-panel="lessons">
+    {% for module in modules %}
+    <div class="card card-pad" style="margin-bottom:14px">
+      <div class="row-between"><h3 style="margin:0">{{ module.title }}</h3><a class="btn btn-sm btn-outline" href="{% url 'courses:new_lesson' course.slug %}?module={{ module.pk }}"><svg class="icon"><use href="#i-plus"/></svg>Lesson</a></div>
+      <ul class="plain-list" style="margin-top:10px">{% for l in module.lessons.all %}<li><a href="{{ l.get_absolute_url }}">{{ l.title }}</a><span class="row" style="gap:6px">{% if l.is_preview %}<span class="badge badge-brand">Free</span>{% endif %}<a class="btn btn-sm btn-ghost" href="{% url 'classroom:assessment_new' course.slug %}?lesson={{ l.pk }}">+ Assessment</a><a class="btn btn-sm btn-ghost" href="{% url 'courses:edit_lesson' course.slug l.pk %}">Edit</a></span></li>{% empty %}<li class="muted small">No lessons yet.</li>{% endfor %}</ul>
+    </div>
+    {% endfor %}
+    <form method="post" action="{% url 'courses:add_module' course.slug %}" class="row card card-pad">{% csrf_token %}
+      <input class="input" name="title" placeholder="New module or chapter title" required maxlength="160" style="max-width:360px">
+      <button class="btn btn-dark">Add module</button>
+    </form>
+  </section>
+
+  <section class="tab-panel" data-panel="files">
+    <div class="grid grid-2" style="align-items:start">
+      <form method="post" action="{% url 'courses:upload_material' course.slug %}" enctype="multipart/form-data" class="card card-pad upload-card" data-upload>{% csrf_token %}
+        <h3>Upload a file</h3>
+        <p class="muted small">PDF, Word, PowerPoint, Excel, HTML or images, up to 25 MB. Word and PowerPoint files are also turned into a page students can read on any phone.</p>
+        {% with form=material_form %}{% include 'partials/form_fields.html' %}{% endwith %}
+        <button class="btn btn-primary" type="submit"><svg class="icon"><use href="#i-upload"/></svg>Upload</button>
+      </form>
+      <div class="card card-pad">
+        <h3>Files in this course</h3>
+        <ul class="file-list">
+          {% for m in materials %}
+          <li><span class="file-icon kind-{{ m.kind }}">{{ m.get_kind_display|slice:':4'|upper }}</span>
+            <span class="file-main"><a href="{{ m.get_absolute_url }}"><strong>{{ m.title }}</strong></a><span class="muted small">{{ m.get_category_display }} · {{ m.size|filesizeformat }} · {{ m.views }} view{{ m.views|pluralize }}{% if m.is_preview %} · free{% endif %}</span></span>
+            <form method="post" action="{% url 'courses:delete_material' course.slug m.pk %}" data-confirm="Delete this file?">{% csrf_token %}<button class="icon-btn" aria-label="Delete {{ m.title }}"><svg class="icon"><use href="#i-trash"/></svg></button></form>
+          </li>
+          {% empty %}<li class="muted small">No files yet.</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" data-panel="students">
+    <div class="card table-wrap" style="margin-bottom:56px">
+      <table class="table"><thead><tr><th>Student</th><th>Progress</th><th>Access</th><th>Joined</th></tr></thead><tbody>
+        {% for r in rows %}<tr><td>{{ r.e.user.display_name }}<div class="muted small">{{ r.e.user.email }}</div></td><td style="min-width:140px"><div class="progress"><span style="width:{{ r.percent }}%"></span></div><span class="small muted">{{ r.percent }}%</span></td><td>{% if r.e.has_access %}<span class="badge badge-brand">{% if r.e.access_until %}Until {{ r.e.access_until|date:"j M" }}{% else %}Active{% endif %}</span>{% else %}<span class="badge badge-danger">Ended</span>{% endif %}</td><td class="muted">{{ r.e.created_at|naturalday }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="muted">No students yet.</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Profile · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:980px">
+  <div class="profile-hero card card-pad">
+    <div class="row" style="gap:18px;flex-wrap:wrap">
+      {% if user.photo %}<img src="{{ user.photo.url }}" alt="" class="avatar-img lg">{% else %}<span class="avatar avatar-lg">{{ user.initials }}</span>{% endif %}
+      <div><h1 style="margin:0">{{ user.display_name }}{% if user.is_verified_tutor and user.is_tutor %} <span class="verified" title="Verified teacher"><svg class="icon"><use href="#i-check-circle"/></svg></span>{% endif %}</h1>
+        <span class="muted">{{ user.email }} · {{ user.get_role_display }}{% if user.get_year_display %} · {{ user.get_year_display }}{% endif %}</span></div>
+    </div>
+  </div>
+  <div class="dash-grid" style="margin-top:20px">
+    <form method="post" enctype="multipart/form-data" class="card card-pad" novalidate>{% csrf_token %}
+      <h3 class="card-title">Your details</h3>
+      {% include 'partials/form_fields.html' %}
+      <div class="row" style="flex-wrap:wrap"><button type="submit" class="btn btn-primary">Save changes</button><a href="{% url 'accounts:password_change' %}" class="btn btn-outline">Change password</a></div>
+    </form>
+    <div>
+      {% if user.is_student %}
+      <div class="card card-pad">
+        <h3 class="card-title"><svg class="icon"><use href="#i-heart"/></svg>Parents and guardians</h3>
+        <p class="muted small">Give this code to a parent. They enter it in the parent portal to follow your progress and pay for your courses.</p>
+        <div class="code-display"><span class="muted small">Your invite code</span><strong>{{ user.invite_code }}</strong></div>
+        <ul class="plain-list">{% for l in parent_links %}<li><span>{{ l.parent.display_name }}<div class="muted small">{{ l.relationship|default:"Parent" }}</div></span><form method="post" action="{% url 'portal:unlink' l.pk %}" data-confirm="Stop sharing your progress with {{ l.parent.display_name }}?">{% csrf_token %}<button class="btn btn-sm btn-ghost">Remove</button></form></li>{% empty %}<li class="muted small">No parent linked yet.</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      {% if user.is_parent %}
+      <div class="card card-pad">
+        <h3 class="card-title"><svg class="icon"><use href="#i-users"/></svg>Your children</h3>
+        <ul class="plain-list">{% for l in child_links %}<li><span>{{ l.student.display_name }}</span><a class="btn btn-sm btn-ghost" href="{% url 'portal:parent_home' %}">View</a></li>{% empty %}<li class="muted small">No children linked yet.</li>{% endfor %}</ul>
+        <a class="btn btn-outline btn-sm" href="{% url 'portal:parent_link' %}"><svg class="icon"><use href="#i-plus"/></svg>Link a child</a>
+      </div>
+      {% endif %}
+      {% if user.is_tutor %}
+      <div class="card card-pad">
+        <h3 class="card-title"><svg class="icon"><use href="#i-shield"/></svg>Verification</h3>
+        <p class="muted small">Your TCZ registration, degree and subject specialisations.</p>
+        <a class="btn btn-outline btn-sm" href="{% url 'portal:tutor_apply' %}">View verification</a>
+        <a class="btn btn-ghost btn-sm" href="{% url 'portal:tutor_profile' user.pk %}">Public profile</a>
+      </div>
+      {% endif %}
+      <div class="card card-pad" style="margin-top:20px">
+        <h3 class="card-title"><svg class="icon"><use href="#i-wallet"/></svg>Payments</h3>
+        <a class="small" href="{% url 'payments:history' %}">Payment history and receipts &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Create your account · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <h1>Create your free account</h1>
+  <p class="muted">Start with free preview lessons. No payment needed.</p>
+  <form method="post" novalidate>{% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-row">
+      {% with field=form.first_name %}{% include 'partials/field.html' %}{% endwith %}
+      {% with field=form.last_name %}{% include 'partials/field.html' %}{% endwith %}
+    </div>
+    {% with field=form.email %}{% include 'partials/field.html' %}{% endwith %}
+    {% with field=form.level %}{% include 'partials/field.html' %}{% endwith %}
+    {% with field=form.password1 %}{% include 'partials/field.html' with help="At least 8 characters. Avoid common words." %}{% endwith %}
+    {% with field=form.password2 %}{% include 'partials/field.html' %}{% endwith %}
+    <div class="field-check">{{ form.agree }}<label for="{{ form.agree.id_for_label }}">I agree to the <a href="{% url 'core:terms' %}" target="_blank">Terms</a> and <a href="{% url 'core:privacy' %}" target="_blank">Privacy Policy</a></label></div>
+    {{ form.agree.errors }}
+    <button type="submit" class="btn btn-primary btn-block btn-lg">Create account</button>
+  </form>
+  <div class="form-foot">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></div>
+</div>
+{% endblock %}

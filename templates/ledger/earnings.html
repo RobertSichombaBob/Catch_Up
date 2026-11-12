@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Earnings · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head"><span class="eyebrow">Earnings</span><h1>Your 50% share</h1><p class="muted">You earn half of every subscription to your courses, after payment fees. Balances are paid monthly to your mobile money number.</p></div>
+  <div class="stat-grid" style="margin:20px 0">
+    <div class="card stat"><div class="label">Available balance</div><div class="value">K{{ balance|floatformat:2|intcomma }}</div></div>
+    <div class="card stat"><div class="label">Earned all time</div><div class="value">K{{ earned|floatformat:2|intcomma }}</div></div>
+    <div class="card stat"><div class="label">Paid out</div><div class="value">K{{ paid|floatformat:2|intcomma }}</div></div>
+    <div class="card stat"><div class="label">Payout number</div><div class="value" style="font-size:1.1rem;margin-top:10px">{{ user.tutor_profile.payout_phone|default:user.phone|default:"Not set" }}</div></div>
+  </div>
+  <div class="chart-card card card-pad" data-chart="tutor-earnings" data-src="{% url 'api:tutor_overview' %}"></div>
+  <div class="grid grid-2" style="margin:20px 0 56px;align-items:start">
+    <div class="card table-wrap"><table class="table"><thead><tr><th>Date</th><th>From</th><th>Amount</th></tr></thead><tbody>
+      {% for e in entries %}<tr><td class="muted">{{ e.created_at|date:"j M Y" }}</td><td>{% if e.kind == 'payout' %}Payout{% else %}{{ e.payment.learner.display_name|default:"Student" }} · {{ e.course.title|truncatechars:28 }}{% endif %}</td><td class="{% if e.amount_ngwee < 0 %}neg{% else %}pos{% endif %}">K{{ e.amount_kwacha|floatformat:2 }}</td></tr>
+      {% empty %}<tr><td colspan="3" class="muted">No earnings yet. They appear here the moment a student pays.</td></tr>{% endfor %}
+    </tbody></table></div>
+    <div class="card card-pad"><h3>Payouts</h3><ul class="plain-list">{% for p in payouts %}<li><span>{{ p.created_at|date:"j M Y" }} · {{ p.msisdn }}</span><strong>K{{ p.amount|floatformat:2 }} · {{ p.get_status_display }}</strong></li>{% empty %}<li class="muted small">No payouts yet.</li>{% endfor %}</ul></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Book a lesson · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card" style="max-width:600px">
+  <a href="{% url 'classroom:my_classes' %}" class="small">&larr; My classes</a>
+  <h1>Book an extra lesson</h1>
+  <p class="muted">{{ course.title }} with <strong>{{ course.tutor.display_name }}</strong>. Your tutor confirms the time and sends a meeting link. Extra lessons are included in your subscription.</p>
+  <form method="post" novalidate>{% csrf_token %}{% include 'partials/form_fields.html' %}<button class="btn btn-primary btn-block btn-lg"><svg class="icon"><use href="#i-calendar"/></svg>Send request</button></form>
+</div>
+{% endblock %}

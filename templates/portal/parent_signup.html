@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Parent account · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <span class="eyebrow">For parents and guardians</span>
+  <h1>Create a parent account</h1>
+  <p class="muted">Follow your child's lessons, attendance and grades, get alerts, and pay for courses with mobile money.</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include 'partials/form_fields.html' %}
+    <button type="submit" class="btn btn-primary btn-block btn-lg">Create parent account</button>
+  </form>
+  <div class="form-foot">Already have one? <a href="{% url 'portal:parent_login' %}">Sign in</a></div>
+</div>
+{% endblock %}

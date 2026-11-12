@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Catch Up: A-level and university courses{% endblock %}</title>
+  <meta name="description" content="{% block description %}Catch Up is where A-level and university students learn Mathematics, Physics, Chemistry, Biology, Computer Science and Data Science with clear lessons from expert tutors. Verified teachers. Pay monthly with MTN, Airtel or Zamtel mobile money.{% endblock %}">
+  <meta name="theme-color" content="#0e7a4f">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="has-bottom-nav {% block body_class %}{% endblock %}">
+  {% include 'partials/icons.html' %}
+  <a class="skip-link" href="#main">Skip to content</a>
+  {% if PAYMENT_DEMO_MODE %}<div class="demo-banner"><strong>Demo mode:</strong> payments are simulated and no money moves.</div>{% endif %}
+  {% include 'partials/header.html' %}
+  {% if messages %}
+  <div class="messages" role="status" aria-live="polite">
+    {% for message in messages %}
+    <div class="message {{ message.tags }}">
+      <svg class="icon"><use href="#i-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert{% else %}info{% endif %}"/></svg>
+      <span>{{ message }}</span>
+      <button type="button" aria-label="Dismiss">&times;</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <main id="main">{% block content %}{% endblock %}</main>
+  {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
+  {% include 'partials/bottom_nav.html' %}
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

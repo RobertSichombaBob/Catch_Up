@@ -1,0 +1,8 @@
+Welcome to Catch Up, {{ user.first_name|default:"there" }}!
+
+Your account is ready.
+1. Pick a course.
+2. Read the free preview lesson.
+3. Unlock the full course with MTN, Airtel or Zamtel mobile money.
+
+Browse courses: {{ action_url }}

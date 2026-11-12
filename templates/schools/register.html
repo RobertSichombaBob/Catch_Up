@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Set up your school · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card" style="max-width:680px">
+  <a href="{% url 'schools:index' %}" class="small">&larr; Schools</a>
+  <h1>Set up your school</h1>
+  <p class="muted">You become the school administrator. You'll get two join codes: one for teachers and one for students. Your school appears publicly once our team has checked it.</p>
+  <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}{% include 'partials/form_fields.html' %}<button class="btn btn-primary btn-block btn-lg">Create school</button></form>
+</div>
+{% endblock %}

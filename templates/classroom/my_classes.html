@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}My classes · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between">
+    <div><span class="eyebrow">Classroom</span><h1>My classes</h1><p class="muted">Live classes, extra lessons, assessments due and lesson requests, all in one place.</p></div>
+    <a href="{% url 'classroom:my_grades' %}" class="btn btn-outline"><svg class="icon"><use href="#i-award"/></svg>My grades</a>
+  </div>
+  {% if not courses %}
+  <div class="card card-pad empty-state"><svg class="icon icon-lg"><use href="#i-calendar"/></svg><h3>No active subscriptions</h3><p class="muted">Subscribe to a course to join its live classes and book extra lessons with its tutor.</p><a class="btn btn-primary" href="{% url 'courses:catalog' %}">Browse courses</a></div>
+  {% else %}
+  <div class="dash-grid">
+    <div>
+      <div class="card card-pad" data-reveal>
+        <h3 class="card-title"><svg class="icon"><use href="#i-video"/></svg>Upcoming sessions</h3>
+        <ul class="session-list">
+          {% for s in sessions %}
+          <li>
+            <span class="date-chip"><b>{{ s.starts_at|date:"j" }}</b>{{ s.starts_at|date:"M" }}</span>
+            <span class="file-main"><a href="{{ s.get_absolute_url }}"><strong>{{ s.title }}</strong></a><span class="muted small">{{ s.course.title }} · {{ s.get_kind_display }} · {{ s.starts_at|time:"H:i" }}{% if s.class_group %} · {{ s.class_group.name }}{% endif %}</span></span>
+            {% if s.is_live %}<a class="btn btn-sm btn-accent" href="{{ s.get_absolute_url }}"><span class="pulse-dot"></span>Live now</a>{% else %}<a class="btn btn-sm btn-ghost" href="{{ s.get_absolute_url }}">Details</a>{% endif %}
+          </li>
+          {% empty %}<li class="muted small">No sessions scheduled yet. Your tutors will add them here.</li>{% endfor %}
+        </ul>
+      </div>
+      <div class="card card-pad" style="margin-top:20px" data-reveal>
+        <h3 class="card-title"><svg class="icon"><use href="#i-target"/></svg>Assessments to do</h3>
+        <ul class="plain-list">
+          {% for a in due %}<li><a href="{{ a.get_absolute_url }}"><strong>{{ a.title }}</strong><div class="muted small">{{ a.course.title }} · {{ a.get_kind_display }}{% if a.required_to_progress %} · needed for the next lesson{% endif %}</div></a><span class="small muted">{% if a.due_at %}Due {{ a.due_at|date:"j M" }}{% endif %}</span></li>
+          {% empty %}<li class="muted small">You're all caught up.</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card card-pad" data-reveal>
+        <h3 class="card-title"><svg class="icon"><use href="#i-users"/></svg>Class groups</h3>
+        <ul class="plain-list">
+          {% for g in groups %}
+          <li><span><strong>{{ g.name }}</strong><div class="muted small">{{ g.course.title }} · {{ g.n }}/{{ g.capacity }}{% if g.description %} · {{ g.description }}{% endif %}</div></span>
+            {% if g.pk in mine %}<span class="badge badge-brand">Joined</span>
+            {% elif g.is_open and g.seats_left > 0 %}<form method="post" action="{% url 'classroom:join_group' g.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline">Join</button></form>
+            {% else %}<span class="badge">Full</span>{% endif %}
+          </li>
+          {% empty %}<li class="muted small">Your tutors haven't created class groups yet.</li>{% endfor %}
+        </ul>
+      </div>
+      <div class="card card-pad" style="margin-top:20px" data-reveal>
+        <h3 class="card-title"><svg class="icon"><use href="#i-calendar"/></svg>Book an extra lesson</h3>
+        <ul class="plain-list">{% for c in courses %}<li><span>{{ c.title }}<div class="muted small">with {{ c.tutor.display_name }}</div></span><a class="btn btn-sm btn-primary" href="{% url 'classroom:book' c.slug %}">Book</a></li>{% endfor %}</ul>
+        {% if bookings %}<h4 style="margin-top:18px">Your requests</h4>
+        <ul class="plain-list">{% for b in bookings %}<li><span>{{ b.topic|truncatechars:40 }}<div class="muted small">{{ b.course.title }} · {{ b.preferred_start|date:"j M H:i" }}{% if b.tutor_reply %} · "{{ b.tutor_reply|truncatechars:50 }}"{% endif %}</div></span>{% if b.session %}<a class="status-badge-{{ b.status }}" href="{{ b.session.get_absolute_url }}">{{ b.get_status_display }}</a>{% else %}<span class="status-badge-{{ b.status }}">{{ b.get_status_display }}</span>{% endif %}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

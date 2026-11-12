@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ s.title }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px">
+  <div class="page-head">
+    <a href="{{ s.course.get_absolute_url }}" class="small">&larr; {{ s.course.title }}</a>
+    <h1>{{ s.title }}</h1>
+    <div class="row muted"><span class="badge">{{ s.get_kind_display }}</span><span>{{ s.starts_at|date:"l j F, H:i" }} · {{ s.duration_minutes }} min</span>{% if s.class_group %}<span>· {{ s.class_group.name }}</span>{% endif %}{% if s.is_cancelled %}<span class="badge badge-danger">Cancelled</span>{% elif s.is_live %}<span class="badge badge-accent pulse-dot">Live now</span>{% endif %}</div>
+  </div>
+  <div class="grid grid-2" style="align-items:start;margin:18px 0">
+    <div class="card card-pad">
+      <h3>Join</h3>
+      {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="btn btn-primary btn-block btn-lg"><svg class="icon"><use href="#i-video"/></svg>Open meeting</a>{% elif s.location %}<p><strong>Location:</strong> {{ s.location }}</p>{% else %}<p class="muted">Your tutor will add the link before the session.</p>{% endif %}
+      {% if s.recording_url %}<a href="{{ s.recording_url }}" target="_blank" rel="noopener" class="btn btn-outline btn-block" style="margin-top:10px">Watch the recording</a>{% endif %}
+      {% if s.agenda %}<h4 style="margin-top:16px">Agenda</h4><p>{{ s.agenda|linebreaksbr }}</p>{% endif %}
+    </div>
+    {% if manager %}
+    <div class="card card-pad"><h3>Check-in code</h3><div class="code-display">{{ s.check_in_code }}</div><p class="muted small">Show this during the class. Students who enter it are marked present (late after 10 minutes).</p>
+      <a href="{% url 'classroom:session_edit' s.course.slug s.pk %}" class="btn btn-sm btn-outline">Edit session</a></div>
+    {% else %}
+    <div class="card card-pad"><h3>Attendance</h3>
+      {% if record %}<div class="alert alert-success"><svg class="icon"><use href="#i-check-circle"/></svg><span>You're marked <strong>{{ record.get_status_display|lower }}</strong>.</span></div>
+      {% else %}<form method="post" action="{% url 'classroom:check_in' s.pk %}">{% csrf_token %}{% include 'partials/form_fields.html' %}<button class="btn btn-primary btn-block">Check in</button></form>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% if manager %}
+  <form method="post" action="{% url 'classroom:register' s.pk %}" class="card table-wrap" style="margin-bottom:56px">{% csrf_token %}
+    <div class="row-between" style="padding:16px 20px"><h3 style="margin:0">Register</h3><div class="row"><button type="button" class="btn btn-sm btn-ghost" data-mark-all="present">All present</button><button class="btn btn-sm btn-primary">Save register</button></div></div>
+    <table class="table"><thead><tr><th>Student</th>{% for v, l in statuses %}<th class="center">{{ l }}</th>{% endfor %}</tr></thead><tbody>
+      {% for row in register %}<tr><td>{{ row.student.display_name }}{% if row.record.self_checked_in %} <span class="badge badge-brand">checked in</span>{% endif %}</td>
+        {% for v, l in statuses %}<td class="center"><input type="radio" name="status_{{ row.student.pk }}" value="{{ v }}" aria-label="{{ l }}" {% if row.record.status == v %}checked{% endif %}></td>{% endfor %}</tr>
+      {% empty %}<tr><td colspan="5" class="muted">No students expected for this session yet.</td></tr>{% endfor %}
+    </tbody></table>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

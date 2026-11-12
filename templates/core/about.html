@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}About · Catch Up{% endblock %}
+{% block content %}
+<div class="container page-content">
+  <span class="eyebrow">About us</span>
+  <h1>Learning that meets students where they are</h1>
+  <p class="lead">Catch Up exists for every student who has sat in a lecture or lesson and thought, "I'm lost." We turn the hardest topics in A-level and first-year university science and mathematics into clear, structured lessons you can study on your phone.</p>
+  <h2>What we believe</h2>
+  <ul>
+    <li><strong>Clarity beats volume.</strong> Short lessons that build one idea at a time.</li>
+    <li><strong>Practice makes it stick.</strong> Every lesson ends with questions and full model answers.</li>
+    <li><strong>Price should never be a barrier.</strong> From K{{ COURSE_PRICE }} a month per course, paid with the mobile money you already use.</li>
+  </ul>
+  <h2>Who teaches</h2>
+  <p>Every course is written and maintained by a subject specialist, and courses are updated as syllabuses change.</p>
+  <h2>Get in touch</h2>
+  <p>Questions, partnerships or school licences: <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.</p>
+</div>
+{% endblock %}

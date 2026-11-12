@@ -1,0 +1,8 @@
+<nav class="bottom-nav" aria-label="Quick navigation">
+  {% for item in bottom_nav %}
+  <a href="{{ item.url }}" class="{% if item.active %}active{% endif %}" {% if item.active %}aria-current="page"{% endif %}>
+    <span class="bn-icon"><svg class="icon"><use href="#i-{{ item.icon }}"/></svg>{% if item.icon == 'bell' and unread_count %}<span class="bn-badge">{{ unread_count }}</span>{% endif %}</span>
+    <span class="bn-label">{{ item.label }}</span>
+  </a>
+  {% endfor %}
+</nav>

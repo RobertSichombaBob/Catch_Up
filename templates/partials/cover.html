@@ -1,0 +1,15 @@
+{% comment %}Book-style cover: the tutor's photo if uploaded, otherwise a designed cover in the subject colour.{% endcomment %}
+<div class="book-cover{% if size %} {{ size }}{% endif %}" style="--c:{{ course.subject.colour }}">
+  {% if course.cover %}
+    <img src="{{ course.cover.url }}" alt="" loading="lazy">
+    <span class="book-tag">{{ course.subject.name }}</span>
+  {% else %}
+    <span class="book-spine"></span>
+    <span class="book-pattern" aria-hidden="true"><svg class="icon"><use href="#i-{{ course.subject.icon }}"/></svg></span>
+    <span class="book-text">
+      <span class="book-kicker">{{ course.subject.name }}{% if course.year %} · {{ course.get_year_display }}{% endif %}</span>
+      <span class="book-title">{{ course.title }}</span>
+      <span class="book-author">{{ course.tutor.display_name }}</span>
+    </span>
+  {% endif %}
+</div>

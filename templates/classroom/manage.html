@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ course.title }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between">
+    <div><a href="{% url 'classroom:tutor_home' %}" class="small">&larr; Classes and grading</a><h1>{{ course.title }}</h1></div>
+    <div class="row"><a href="{% url 'classroom:session_new' course.slug %}" class="btn btn-primary"><svg class="icon"><use href="#i-calendar"/></svg>Schedule session</a><a href="{% url 'classroom:assessment_new' course.slug %}" class="btn btn-outline"><svg class="icon"><use href="#i-target"/></svg>New assessment</a><a href="{% url 'classroom:gradebook' course.slug %}" class="btn btn-outline"><svg class="icon"><use href="#i-award"/></svg>Gradebook</a></div>
+  </div>
+  <div class="tabs" data-tabs>
+    <button class="tab active" data-tab="sessions">Sessions</button>
+    <button class="tab" data-tab="assess">Assessments ({{ assessments|length }})</button>
+    <button class="tab" data-tab="groups">Classes ({{ groups|length }})</button>
+    <button class="tab" data-tab="announce">Announcements</button>
+  </div>
+  <section class="tab-panel active" data-panel="sessions">
+    <div class="grid grid-2" style="align-items:start">
+      <div class="card card-pad"><h3>Upcoming</h3><ul class="session-list">{% for s in upcoming %}<li><span class="date-chip"><b>{{ s.starts_at|date:"j" }}</b>{{ s.starts_at|date:"M" }}</span><span class="file-main"><a href="{{ s.get_absolute_url }}"><strong>{{ s.title }}</strong></a><span class="muted small">{{ s.get_kind_display }} · {{ s.starts_at|time:"H:i" }}{% if s.class_group %} · {{ s.class_group.name }}{% endif %}{% if s.is_cancelled %} · Cancelled{% endif %}</span></span><a class="btn btn-sm btn-ghost" href="{% url 'classroom:session_edit' course.slug s.pk %}">Edit</a></li>{% empty %}<li class="muted small">Nothing scheduled.</li>{% endfor %}</ul></div>
+      <div class="card card-pad"><h3>Recent attendance</h3><ul class="plain-list">{% for s in past %}<li><a href="{{ s.get_absolute_url }}">{{ s.title|truncatechars:30 }} · {{ s.starts_at|date:"j M" }}</a><span class="muted small">{{ s.present }} present</span></li>{% empty %}<li class="muted small">No past sessions.</li>{% endfor %}</ul></div>
+    </div>
+  </section>
+  <section class="tab-panel" data-panel="assess">
+    <div class="card table-wrap"><table class="table"><thead><tr><th>Title</th><th>Lesson</th><th>Questions</th><th>Submissions</th><th>Status</th><th></th></tr></thead><tbody>
+      {% for a in assessments %}<tr><td><strong>{{ a.title }}</strong><div class="muted small">{{ a.get_kind_display }}{% if a.required_to_progress %} · gates next lesson{% endif %}</div></td><td class="small">{{ a.lesson.title|default:"–" }}</td><td>{{ a.n_questions }}</td><td>{{ a.n_submissions }}</td><td>{% if a.is_published %}<span class="badge badge-brand">Published</span>{% else %}<span class="badge">Draft</span>{% endif %}</td><td><a class="btn btn-sm btn-outline" href="{% url 'classroom:assessment_edit' course.slug a.pk %}">Edit</a></td></tr>
+      {% empty %}<tr><td colspan="6" class="muted">No assessments yet. Continuous assessment keeps students on track: add a short quiz after each lesson.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <section class="tab-panel" data-panel="groups">
+    <div class="grid grid-2" style="align-items:start">
+      <div class="card card-pad"><h3>Classes</h3><ul class="plain-list">{% for g in groups %}<li><a href="{% url 'classroom:group' course.slug g.pk %}">{{ g.name }}</a><span class="muted small">{{ g.n }}/{{ g.capacity }} students</span></li>{% empty %}<li class="muted small">No classes yet. Classes let you teach groups at different times.</li>{% endfor %}</ul></div>
+      <form method="post" action="{% url 'classroom:group_new' course.slug %}" class="card card-pad">{% csrf_token %}<h3>New class</h3>{% with form=group_form %}{% include 'partials/form_fields.html' %}{% endwith %}<button class="btn btn-primary">Create class</button></form>
+    </div>
+  </section>
+  <section class="tab-panel" data-panel="announce">
+    <div class="grid grid-2" style="align-items:start;margin-bottom:56px">
+      <form method="post" action="{% url 'classroom:announce' course.slug %}" class="card card-pad">{% csrf_token %}<h3>Send an announcement</h3>{% with form=announcement_form %}{% include 'partials/form_fields.html' %}{% endwith %}<button class="btn btn-primary"><svg class="icon"><use href="#i-mail"/></svg>Send</button></form>
+      <div class="card card-pad"><h3>Sent</h3><ul class="plain-list">{% for a in announcements %}<li><span><strong>{{ a.title }}</strong><div class="muted small">{{ a.body|truncatechars:80 }}</div></span><span class="muted small">{{ a.created_at|date:"j M" }}</span></li>{% empty %}<li class="muted small">None yet.</li>{% endfor %}</ul></div>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{% if course %}Edit {{ course.title }}{% else %}New course{% endif %} · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:820px">
+  <div class="page-head"><span class="eyebrow">Course studio</span><h1>{% if course %}Edit course{% else %}Create a course{% endif %}</h1>
+    {% if not user.is_verified_tutor %}<div class="alert alert-info" style="margin-top:12px"><svg class="icon"><use href="#i-info"/></svg><span>You can build your course now and publish once your <a href="{% url 'portal:tutor_apply' %}">verification</a> is approved.</span></div>{% endif %}
+  </div>
+  <form method="post" enctype="multipart/form-data" class="card card-pad" style="margin:18px 0 56px" novalidate>{% csrf_token %}
+    {% include 'partials/form_fields.html' %}
+    <div class="row"><button class="btn btn-primary" type="submit">{% if course %}Save changes{% else %}Create course{% endif %}</button>{% if course %}<a href="{% url 'courses:studio' course.slug %}" class="btn btn-ghost">Cancel</a>{% endif %}</div>
+  </form>
+</div>
+{% endblock %}

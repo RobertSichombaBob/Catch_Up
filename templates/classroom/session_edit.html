@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}{% if session %}Edit session{% else %}Schedule a session{% endif %} · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card" style="max-width:640px">
+  <a href="{% url 'classroom:manage' course.slug %}" class="small">&larr; {{ course.title }}</a>
+  <h1>{% if session %}Edit session{% else %}Schedule a session{% endif %}</h1>
+  <p class="muted small">Paste a Google Meet, Zoom or Teams link. Students get the link, a reminder an hour before, and a 4-digit check-in code during the class.</p>
+  <form method="post" novalidate>{% csrf_token %}{% include 'partials/form_fields.html' %}<button class="btn btn-primary btn-block btn-lg">Save session</button></form>
+  {% if session and not session.is_cancelled %}<form method="post" action="{% url 'classroom:session_cancel' session.pk %}" data-confirm="Cancel this session and notify students?" style="margin-top:12px">{% csrf_token %}<button class="btn btn-ghost btn-block">Cancel session</button></form>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Classes and grading · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between"><div><span class="eyebrow">Teacher toolkit</span><h1>Classes and grading</h1></div><a href="{% url 'courses:new_course' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>New course</a></div>
+  <div class="dash-grid" style="margin:18px 0 56px">
+    <div class="card card-pad span-2">
+      <h2 class="card-title">Upcoming sessions</h2>
+      <ul class="session-list">{% for s in sessions %}
+        <li><span class="date-chip"><b>{{ s.starts_at|date:"j" }}</b>{{ s.starts_at|date:"M" }}</span><span class="file-main"><a href="{{ s.get_absolute_url }}"><strong>{{ s.title }}</strong></a><span class="muted small">{{ s.course.title }}{% if s.class_group %} · {{ s.class_group.name }}{% endif %} · {{ s.starts_at|time:"H:i" }}, {{ s.duration_minutes }} min</span></span>{% if s.is_live %}<span class="badge badge-accent pulse-dot">Live now</span>{% endif %}</li>
+      {% empty %}<li class="muted small">No sessions scheduled. Open a course below to schedule one.</li>{% endfor %}</ul>
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Work to mark <span class="badge badge-accent">{{ to_mark|length }}</span></h2>
+      <ul class="plain-list">{% for s in to_mark %}<li><a href="{% url 'classroom:mark' s.pk %}">{{ s.student.display_name }}</a><span class="muted small">{{ s.assessment.title|truncatechars:22 }}</span></li>{% empty %}<li class="muted small">All marked. Nice.</li>{% endfor %}</ul>
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Lesson requests</h2>
+      <ul class="plain-list">{% for b in bookings %}<li><a href="{% url 'classroom:booking_reply' b.pk %}">{{ b.student.display_name }}: {{ b.topic|truncatechars:26 }}</a><span class="muted small">{{ b.preferred_start|date:"D j M H:i" }}</span></li>{% empty %}<li class="muted small">No requests.</li>{% endfor %}</ul>
+    </div>
+    <div class="card card-pad span-2">
+      <h2 class="card-title">Your courses</h2>
+      <table class="table compact"><thead><tr><th>Course</th><th>Students</th><th>Classes</th><th></th></tr></thead><tbody>
+        {% for c in courses %}<tr><td>{{ c.title }}</td><td>{{ c.students }}</td><td>{{ c.group_count }}</td><td class="row" style="justify-content:flex-end"><a class="btn btn-sm btn-outline" href="{% url 'classroom:manage' c.slug %}">Manage</a><a class="btn btn-sm btn-ghost" href="{% url 'classroom:gradebook' c.slug %}">Gradebook</a></td></tr>
+        {% empty %}<tr><td colspan="4" class="muted">No courses yet.</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+  </div>
+</div>
+{% endblock %}

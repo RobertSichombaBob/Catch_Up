@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}My grades · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between">
+    <div><span class="eyebrow">Progress</span><h1>My grades</h1></div>
+    <a class="btn btn-outline" href="{% url 'classroom:my_classes' %}">My classes</a>
+  </div>
+  <div class="kpi-grid" style="margin-bottom:20px">
+    <div class="kpi"><span class="sub">Marked assessments</span><strong>{{ subs|length }}</strong></div>
+    <div class="kpi"><span class="sub">Attendance</span><strong>{% if attendance is None %}–{% else %}{{ attendance }}%{% endif %}</strong></div>
+  </div>
+  <div class="card table-wrap">
+    <table class="table">
+      <thead><tr><th>Assessment</th><th>Course</th><th>Score</th><th>Grade</th><th>Marked</th></tr></thead>
+      <tbody>
+        {% for s in subs %}
+        <tr><td><a href="{% url 'classroom:result' s.pk %}"><strong>{{ s.assessment.title }}</strong></a><div class="muted small">{{ s.assessment.get_kind_display }} · attempt {{ s.attempt }}</div></td><td class="small">{{ s.assessment.course.title }}</td><td class="{% if s.passed %}pos{% else %}neg{% endif %}"><strong>{{ s.percent|floatformat:"-1" }}%</strong></td><td><span class="grade-pill grade-{{ s.grade|slugify }}">{{ s.grade }}</span></td><td class="small muted">{{ s.graded_at|date:"j M Y" }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="muted">No marked work yet. Take the quizzes after each lesson to see your grades here.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{% if obj %}{{ obj.title }}{% else %}New assessment{% endif %} · Catch Up{% endblock %}
+{% block head %}{% include "partials/katex.html" %}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head">
+    <a href="{% url 'classroom:manage' course.slug %}" class="small">&larr; {{ course.title }}</a>
+    <h1>{% if obj %}{{ obj.title }}{% else %}New assessment{% endif %}</h1>
+    {% if obj %}<p class="muted">{{ obj.questions.count }} question{{ obj.questions.count|pluralize }} · {{ obj.total_marks }} mark{{ obj.total_marks|pluralize }} · {% if obj.is_published %}<span class="badge badge-brand">Published</span>{% else %}<span class="badge">Draft</span>{% endif %} {% if obj.is_published %}<a href="{{ obj.get_absolute_url }}">Preview as a student</a>{% endif %}</p>{% endif %}
+  </div>
+  <div class="dash-grid">
+    <form method="post" class="card card-pad" novalidate>{% csrf_token %}
+      <h3 class="card-title">Settings</h3>
+      <p class="muted small">Tick <strong>required to progress</strong> and choose a lesson: students then have to attempt (or pass) this before the next lesson opens.</p>
+      {% include 'partials/form_fields.html' %}
+      <button class="btn btn-primary btn-block">Save assessment</button>
+    </form>
+    <div>
+      {% if obj %}
+      <div class="card card-pad">
+        <h3 class="card-title">Questions</h3>
+        <ol class="question-list">
+          {% for q in questions %}
+          <li>
+            <div class="row-between"><span class="badge">{{ q.get_kind_display }}</span><span class="muted small">{{ q.marks }} mark{{ q.marks|pluralize }}</span></div>
+            <div class="q-text math">{{ q.text|linebreaksbr }}</div>
+            {% if q.choice_list %}<ol class="choice-preview">{% for c in q.choice_list %}<li{% if forloop.counter|stringformat:"s" == q.answer %} class="correct"{% endif %}>{{ c }}</li>{% endfor %}</ol>{% elif q.answer %}<p class="small">Answer: <strong>{{ q.answer }}</strong>{% if q.tolerance %} (± {{ q.tolerance|floatformat:"-4" }}){% endif %}</p>{% endif %}
+            <div class="row">
+              <a class="btn btn-sm btn-outline" href="{% url 'classroom:question_edit' course.slug obj.pk q.pk %}">Edit</a>
+              <form method="post" action="{% url 'classroom:question_delete' course.slug obj.pk q.pk %}" data-confirm="Delete this question?">{% csrf_token %}<button class="btn btn-sm btn-ghost">Delete</button></form>
+            </div>
+          </li>
+          {% empty %}<li class="muted small" style="list-style:none">No questions yet. Add the first one below.</li>{% endfor %}
+        </ol>
+      </div>
+      <form method="post" action="{% url 'classroom:question_new' course.slug obj.pk %}" class="card card-pad" style="margin-top:20px" novalidate>{% csrf_token %}
+        <h3 class="card-title">Add a question</h3>
+        <p class="muted small">Multiple choice: one option per line, answer is the option number. Numeric: the number, with an optional tolerance. Short answer: accepted answers separated by <code>|</code>. Written answers are marked by you.</p>
+        {% with form=qform %}{% include 'partials/form_fields.html' %}{% endwith %}
+        <button class="btn btn-accent btn-block"><svg class="icon"><use href="#i-plus"/></svg>Add question</button>
+      </form>
+      {% else %}
+      <div class="card card-pad empty-state"><svg class="icon icon-lg"><use href="#i-target"/></svg><h3>Save the settings first</h3><p class="muted">Then you can add multiple choice, numeric, short and written questions.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

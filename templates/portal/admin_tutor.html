@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Review {{ profile.user.display_name }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px">
+  <div class="page-head"><a href="{% url 'portal:admin_tutors' %}" class="small">&larr; All applications</a><h1>{{ profile.user.display_name }}</h1><span class="badge status-badge-{{ profile.status }}">{{ profile.get_status_display }}</span></div>
+  <div class="grid grid-2" style="margin:18px 0">
+    <div class="card card-pad">
+      <h2 class="card-title">Credentials</h2>
+      <dl class="facts">
+        <dt>Email</dt><dd>{{ profile.user.email }}</dd>
+        <dt>Phone</dt><dd>{{ profile.user.phone|default:"–" }}</dd>
+        <dt>TCZ number</dt><dd>{{ profile.tcz_number|default:"–" }}</dd>
+        <dt>NRC / passport</dt><dd>{{ profile.nrc_number|default:"–" }}</dd>
+        <dt>Qualification</dt><dd>{{ profile.get_qualification_display|default:"–" }}</dd>
+        <dt>Degree</dt><dd>{{ profile.degree_title|default:"–" }}, {{ profile.degree_institution|default:"–" }} {{ profile.graduation_year|default:"" }}</dd>
+        <dt>Specialisations</dt><dd>{% for s in profile.specialisations.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}–{% endfor %}</dd>
+        <dt>Experience</dt><dd>{{ profile.years_experience }} years{% if profile.current_school %}, {{ profile.current_school }}{% endif %}</dd>
+      </dl>
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Documents</h2>
+      <ul class="plain-list">{% for field, label, f in docs %}<li><span>{{ label|capfirst }}</span>{% if f %}<a href="{% url 'portal:tutor_document' profile.pk field %}" target="_blank" rel="noopener">Open</a>{% else %}<span class="muted small">Not uploaded</span>{% endif %}</li>{% endfor %}</ul>
+      <p class="small muted" style="margin-top:12px">Check the TCZ number against the Teaching Council of Zambia register and that the degree matches the subjects.</p>
+    </div>
+  </div>
+  <form method="post" class="card card-pad" style="margin-bottom:56px">{% csrf_token %}
+    <h2 class="card-title">Decision</h2>
+    {% include 'partials/form_fields.html' %}
+    <button class="btn btn-primary" type="submit">Save decision and notify tutor</button>
+  </form>
+</div>
+{% endblock %}

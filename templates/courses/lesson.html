@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ lesson.title }} · {{ course.title }} · Catch Up{% endblock %}
+{% block head %}
+{% load static %}<link rel="stylesheet" href="{% static 'vendor/katex/katex.min.css' %}">
+{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="reader">
+  <aside class="reader-side" aria-label="Course contents">
+    <div class="side-head">
+      <a href="{{ course.get_absolute_url }}">{{ course.title }}</a>
+      {% if user.is_authenticated %}<div style="margin-top:12px"><div class="progress"><span style="width:{{ progress }}%"></span></div><div class="progress-label"><span>{{ progress }}% complete</span><span>{{ done_ids|length }}/{{ total }}</span></div></div>{% endif %}
+    </div>
+    {% for module in modules %}
+      <div class="mod-title">{{ module.title }}</div>
+      {% for l in module.lessons.all %}
+        {% if has_access or l.is_preview %}
+        <a href="{{ l.get_absolute_url }}" class="side-lesson {% if l.pk == lesson.pk %}current{% endif %}" {% if l.pk == lesson.pk %}aria-current="page"{% endif %}>
+          {% if l.pk in done_ids %}<svg class="icon done"><use href="#i-check-circle"/></svg>{% else %}<svg class="icon"><use href="#i-circle"/></svg>{% endif %}<span>{{ l.title }}</span>
+        </a>
+        {% else %}
+        <span class="side-lesson locked"><svg class="icon"><use href="#i-lock"/></svg><span>{{ l.title }}</span></span>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    <div style="height:24px"></div>
+  </aside>
+  <div class="reader-main">
+    <div class="reader-top">
+      <div class="row-between" style="margin-bottom:10px">
+        <div class="crumbs" style="margin:0">{{ course.subject.name }} · {{ lesson.module.title }} · Lesson {{ position }} of {{ total }}</div>
+        <button class="btn btn-outline btn-sm side-toggle" type="button"><svg class="icon"><use href="#i-sidebar"/></svg>Contents</button>
+      </div>
+      <h1>{{ lesson.title }}</h1>
+      <div class="row muted small"><span class="row" style="gap:6px"><svg class="icon" style="width:16px;height:16px"><use href="#i-clock"/></svg>{{ lesson.minutes }} min read</span>{% if lesson.is_preview and not has_access %}<span class="badge badge-brand">Free preview</span>{% endif %}
+        {% if user.is_authenticated and user.pk == course.tutor_id or user.is_staff %}<a href="{% url 'courses:edit_lesson' course.slug lesson.pk %}" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Edit</a>{% endif %}
+      </div>
+    </div>
+    <article class="prose" id="lesson-content">{{ lesson.content|safe }}</article>
+    {% if materials and has_access or materials and lesson.is_preview %}
+    <div class="card card-pad" style="margin-top:28px">
+      <h3 style="margin-bottom:8px">Files for this lesson</h3>
+      <ul class="file-list">{% for m in materials %}<li><span class="file-icon kind-{{ m.kind }}">{{ m.get_kind_display|slice:':4'|upper }}</span><span class="file-main"><strong>{{ m.title }}</strong><span class="muted small">{{ m.get_category_display }}</span></span><a href="{{ m.get_absolute_url }}" class="btn btn-sm btn-outline">Open</a></li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    {% if assessments and has_access %}
+    <div class="assess-box">
+      <svg class="icon"><use href="#i-target"/></svg>
+      <div><strong>Continuous assessment</strong>
+        {% for a in assessments %}<div class="small">{{ a.title }} · {{ a.get_kind_display }}{% if a.required_to_progress %} · <span class="badge badge-warning">Required to continue</span>{% endif %}</div>{% endfor %}
+      </div>
+      {% with a=assessments.0 %}<a href="{{ a.get_absolute_url }}" class="btn btn-accent">Start {{ a.get_kind_display|lower }}</a>{% endwith %}
+    </div>
+    {% endif %}
+
+    {% if not has_access %}
+    <div class="locked-box">
+      <h3>Enjoying this lesson?</h3>
+      <p class="muted">Unlock all {{ total }} lessons in {{ course.title }} for K{{ course.price|floatformat:0 }}, paid with mobile money.</p>
+      <a href="{% url 'payments:checkout' course.slug %}" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-lock"/></svg>Unlock full course</a>
+    </div>
+    {% endif %}
+
+    <div class="reader-nav">
+      {% if prev_lesson %}<a href="{{ prev_lesson.get_absolute_url }}" class="btn btn-outline"><svg class="icon"><use href="#i-arrow-left"/></svg>Previous</a>{% else %}<span></span>{% endif %}
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'courses:toggle_complete' course.slug lesson.pk %}" class="row">{% csrf_token %}
+          {% if is_done %}
+            <button type="submit" class="btn btn-ghost"><svg class="icon" style="color:var(--brand)"><use href="#i-check-circle"/></svg>Completed</button>
+            {% if next_lesson %}<a href="{% if next_locked %}{% url 'payments:checkout' course.slug %}{% else %}{{ next_lesson.get_absolute_url }}{% endif %}" class="btn btn-primary">Next lesson <svg class="icon"><use href="#i-arrow-right"/></svg></a>{% endif %}
+          {% else %}
+            <input type="hidden" name="then" value="next">
+            <button type="submit" class="btn btn-primary"><svg class="icon"><use href="#i-check"/></svg>{% if next_lesson %}Complete &amp; continue{% else %}Complete course{% endif %}</button>
+          {% endif %}
+        </form>
+      {% elif next_lesson %}
+        <a href="{% url 'accounts:signup' %}?next={{ request.path|urlencode }}" class="btn btn-primary">Create a free account to track progress</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
+<script defer src="{% static 'vendor/katex/contrib/auto-render.min.js' %}"></script>
+<script>
+  window.addEventListener('load', function () {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.getElementById('lesson-content'), {
+        delimiters: [{left: '\\[', right: '\\]', display: true}, {left: '\\(', right: '\\)', display: false}],
+        throwOnError: false
+      });
+    }
+  });
+</script>
+{% endblock %}

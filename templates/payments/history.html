@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Payments · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head"><span class="eyebrow">Account</span><h1>Your payments</h1></div>
+  <div class="card table-wrap" style="margin:20px 0 56px">
+    <table class="table">
+      <thead><tr><th>Reference</th><th>Course</th><th>Amount</th><th>Paid with</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+      {% for p in payments %}
+        <tr>
+          <td><a href="{% url 'payments:status' p.pk %}">{{ p.reference }}</a></td>
+          <td>{{ p.course.title }}</td>
+          <td>K{{ p.amount|floatformat:2 }}</td>
+          <td class="muted">{{ p.get_network_display }} · {{ p.phone_display }}</td>
+          <td>{% if p.status == 'completed' %}<span class="badge badge-brand">Paid</span>{% elif p.status == 'failed' %}<span class="badge badge-danger">Failed</span>{% else %}<span class="badge badge-warning">Waiting</span>{% endif %}</td>
+          <td class="muted">{{ p.created_at|date:"j M Y, H:i" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="muted" style="text-align:center;padding:40px">No payments yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Tutor studio · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between">
+    <div><span class="eyebrow">Tutor studio</span><h1>{% if user.is_staff or user.is_platform_admin %}All courses{% else %}Welcome, {{ user.first_name|default:user.display_name }}{% endif %}</h1></div>
+    <div class="row" style="flex-wrap:wrap">
+      <a href="{% url 'courses:new_course' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>New course</a>
+      <a href="{% url 'classroom:tutor_home' %}" class="btn btn-outline"><svg class="icon"><use href="#i-calendar"/></svg>Classes and grading</a>
+      <a href="{% url 'core:dashboard' %}?as=student" class="btn btn-ghost">View as student</a>
+    </div>
+  </div>
+
+  {% if profile and not can_publish %}
+  <div class="alert {% if profile.status == 'rejected' %}alert-warning{% else %}alert-info{% endif %} verify-banner">
+    <svg class="icon"><use href="#i-shield"/></svg>
+    <span>
+      {% if profile.status == 'draft' %}<strong>Get verified to publish and earn.</strong> Upload your TCZ registration, degree certificate and choose the subjects you specialise in. You can build courses as drafts meanwhile.
+      {% elif profile.status == 'submitted' %}<strong>Your documents are being reviewed.</strong> We usually reply within two working days. Keep building your courses as drafts.
+      {% elif profile.status == 'rejected' %}<strong>Changes needed:</strong> {{ profile.review_note|default:"please check your documents and resubmit." }}
+      {% endif %}
+      <a href="{% url 'portal:tutor_apply' %}">{% if profile.status == 'submitted' %}View application{% else %}Complete verification{% endif %}</a>
+    </span>
+  </div>
+  {% endif %}
+
+  <div class="kpi-grid" style="margin:22px 0">
+    <div class="kpi" data-reveal><span class="sub">Active students</span><strong>{{ total_students }}</strong></div>
+    <div class="kpi" data-reveal><span class="sub">Paid subscriptions</span><strong>{{ paid_count }}</strong></div>
+    <div class="kpi" data-reveal><span class="sub">Your balance (50%)</span><strong>K{{ balance|floatformat:2|intcomma }}</strong><a class="small" href="{% url 'ledger:earnings' %}">Earnings &rarr;</a></div>
+    <div class="kpi" data-reveal><span class="sub">To do</span><strong>{{ to_mark }} <small class="muted">to mark</small></strong><a class="small" href="{% url 'classroom:tutor_home' %}">{{ requests }} lesson request{{ requests|pluralize }} &rarr;</a></div>
+  </div>
+
+  <div class="dash-grid">
+    <div>
+      <h2 class="card-title">Your courses</h2>
+      {% for course in courses %}
+      <div class="card card-pad course-row" data-reveal>
+        {% include 'partials/cover.html' with size='sm' %}
+        <div style="flex:1;min-width:0">
+          <h3 style="margin:0"><a href="{{ course.get_absolute_url }}" style="color:inherit">{{ course.title }}</a></h3>
+          <p class="muted small" style="margin:4px 0 10px">{{ course.students }} active student{{ course.students|pluralize }} · K{{ course.price|floatformat:0 }}/month · {{ course.material_count }} file{{ course.material_count|pluralize }} · {% if course.is_published %}<span class="badge badge-brand">Published</span>{% else %}<span class="badge">Draft</span>{% endif %}{% if course.school %} · {{ course.school.name }}{% endif %}</p>
+          <div class="row" style="flex-wrap:wrap;gap:8px">
+            <a href="{% url 'courses:studio' course.slug %}" class="btn btn-sm btn-primary"><svg class="icon"><use href="#i-layers"/></svg>Studio</a>
+            <a href="{% url 'classroom:manage' course.slug %}" class="btn btn-sm btn-outline"><svg class="icon"><use href="#i-users"/></svg>Classroom</a>
+            <a href="{% url 'courses:new_lesson' course.slug %}" class="btn btn-sm btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Lesson</a>
+            <a href="{% url 'classroom:gradebook' course.slug %}" class="btn btn-sm btn-ghost"><svg class="icon"><use href="#i-award"/></svg>Gradebook</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="card empty"><svg class="icon"><use href="#i-layers"/></svg><h3 style="color:var(--ink)">Create your first course</h3><p>Upload your notes, slides and tutorial sheets (PowerPoint, Word, PDF or HTML), set a monthly price, and you keep 50% of every subscription.</p><a href="{% url 'courses:new_course' %}" class="btn btn-primary">New course</a></div>
+      {% endfor %}
+      <div class="card chart-card" style="margin-top:20px" data-chart="tutor-earnings" data-src="{% url 'api:tutor_overview' %}"></div>
+    </div>
+    <div>
+      <div class="card card-pad" data-reveal>
+        <h3 class="card-title"><svg class="icon"><use href="#i-alert"/></svg>Students who need you</h3>
+        <p class="muted small">Our model looks at activity, pace, attendance and scores to spot who may drop off.</p>
+        <div data-chart="tutor-risk" data-src="{% url 'api:tutor_overview' %}"><p class="muted small">Loading…</p></div>
+      </div>
+      <div class="card card-pad" style="margin-top:20px" data-reveal>
+        <h3 class="card-title"><svg class="icon"><use href="#i-video"/></svg>Next sessions</h3>
+        <ul class="session-list">{% for s in upcoming %}<li><span class="date-chip"><b>{{ s.starts_at|date:"j" }}</b>{{ s.starts_at|date:"M" }}</span><span class="file-main"><a href="{{ s.get_absolute_url }}"><strong>{{ s.title|truncatechars:30 }}</strong></a><span class="muted small">{{ s.course.title|truncatechars:26 }} · {{ s.starts_at|time:"H:i" }}</span></span></li>{% empty %}<li class="muted small">Nothing scheduled.</li>{% endfor %}</ul>
+      </div>
+      <div class="card card-pad" style="margin-top:20px" data-reveal>
+        <h3 class="card-title">Recent subscriptions</h3>
+        <ul class="plain-list">{% for e in recent %}<li><span>{{ e.user.display_name }}<div class="muted small">{{ e.course.title|truncatechars:30 }}</div></span><span class="muted small">{{ e.created_at|naturaltime }}</span></li>{% empty %}<li class="muted small">No subscriptions yet.</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

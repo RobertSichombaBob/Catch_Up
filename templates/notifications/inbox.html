@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Notifications · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:820px">
+  <div class="page-head row-between">
+    <div><span class="eyebrow">Inbox</span><h1>Notifications</h1></div>
+    {% if unread_count %}<form method="post" action="{% url 'notifications:mark_all_read' %}">{% csrf_token %}<button class="btn btn-outline btn-sm">Mark all as read</button></form>{% endif %}
+  </div>
+  <div class="card" style="margin:20px 0 48px">
+    {% if notes %}
+    <ul class="notif-list">
+      {% for n in notes %}
+      <li><form method="post" action="{% url 'notifications:open' n.pk %}">{% csrf_token %}
+        <button type="submit" class="notif-row {% if not n.is_read %}unread{% endif %}"><span class="dot"></span>
+          <span><span class="t">{{ n.title }}</span><div class="b">{{ n.body }}</div><div class="d">{{ n.created_at|timesince }} ago</div></span>
+        </button></form></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty"><svg class="icon"><use href="#i-bell"/></svg><p>No notifications yet. We'll let you know about payments, classes, grades and new lessons.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

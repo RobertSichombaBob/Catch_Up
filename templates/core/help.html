@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Help · Catch Up{% endblock %}
+{% block content %}
+<div class="container page-content">
+  <span class="eyebrow">Help centre</span>
+  <h1>Frequently asked questions</h1>
+  <div class="faq" style="margin-top:28px">
+    <details open><summary>How do I pay for a course?</summary><p>Open the course, press <strong>Unlock full course</strong>, pick your network (MTN, Airtel or Zamtel) and enter your mobile money number. A prompt appears on your phone: enter your PIN to approve. The course unlocks as soon as the payment goes through, usually within a minute.</p></details>
+    <details><summary>I didn't get the prompt on my phone.</summary><p>Make sure your phone is on, has signal and that the number is registered for mobile money on the network you chose. If nothing arrives within two minutes, the payment will be marked as not completed and you can try again. You are never charged for a payment you did not approve.</p></details>
+    <details><summary>Money left my wallet but the course is still locked.</summary><p>This is rare and usually resolves itself within a few minutes. Check <a href="{% url 'payments:history' %}">your payments</a>. If it still shows as waiting after 15 minutes, email <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a> with your payment reference (it starts with CU-) and we will fix it.</p></details>
+    <details><summary>How long do I keep access?</summary><p>For good. Once you have paid for a course, it stays in <strong>My learning</strong>, including any lessons added later.</p></details>
+    <details><summary>Can I try before I pay?</summary><p>Yes. Every course has at least one free preview lesson. Create a free account and open it.</p></details>
+    <details><summary>Which levels do you cover?</summary><p>Courses are written for A-level (and equivalent) students and first-year university students. Each course page says which level it targets.</p></details>
+    <details><summary>I forgot my password.</summary><p>Use <a href="{% url 'accounts:password_reset' %}">reset password</a> and we will email you a link.</p></details>
+  </div>
+  <div class="card card-pad" style="margin-top:28px"><h3>Still stuck?</h3><p class="muted" style="margin:0">Email <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a> and we will reply within one working day.</p></div>
+</div>
+{% endblock %}

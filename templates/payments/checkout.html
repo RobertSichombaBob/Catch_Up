@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Unlock {{ course.title }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="checkout">
+    <div class="card card-pad">
+      <span class="eyebrow">Checkout</span>
+      <h1 style="font-size:1.8rem">Pay with mobile money</h1>
+      <p class="muted">Choose your network and enter the number you'll pay from. We'll send a prompt to that phone.</p>
+      {% if simulator %}<div class="alert alert-info" style="margin-bottom:18px"><svg class="icon"><use href="#i-info"/></svg><span><strong>Demo mode.</strong> No real money moves. You'll approve or decline the payment on the next screen. Numbers ending in 13 are declined straight away, so you can test a failure.</span></div>{% endif %}
+      <form method="post" novalidate>{% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+        <fieldset style="border:0;padding:0;margin:0">
+          <legend class="field" style="font-weight:600;font-size:.92rem;margin-bottom:8px">Network</legend>
+          <div class="networks">
+            {% for radio in form.network %}
+            <div class="network-option">
+              <input type="radio" name="{{ radio.data.name }}" value="{{ radio.data.value }}" id="{{ radio.id_for_label }}" {% if radio.data.selected %}checked{% endif %} required>
+              <label for="{{ radio.id_for_label }}"><span class="net-logo {{ radio.data.value }}">{% if radio.data.value == 'MTN' %}MTN{% elif radio.data.value == 'AIRTEL' %}airtel{% else %}ZAMTEL{% endif %}</span>{{ radio.choice_label }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          {{ form.network.errors }}
+        </fieldset>
+        {% with field=form.phone %}{% include 'partials/field.html' with help="Zambian number, e.g. 097 123 4567. We pick the network for you as you type." %}{% endwith %}
+        <button type="submit" class="btn btn-primary btn-block btn-lg"><svg class="icon"><use href="#i-phone"/></svg>Pay K{{ course.price|floatformat:0 }}</button>
+      </form>
+      <ul class="steps-mini">
+        <li><b>1</b><span>Press <strong>Pay</strong>. A prompt appears on your phone within a few seconds.</span></li>
+        <li><b>2</b><span>Check the amount (K{{ course.price|floatformat:0 }}) and enter your mobile money PIN.</span></li>
+        <li><b>3</b><span>The course unlocks automatically. We also email you a receipt.</span></li>
+      </ul>
+    </div>
+    <aside class="card summary-card">
+      <div class="row" style="margin-bottom:14px"><span class="subject-icon" style="background:{{ course.subject.colour }}"><svg class="icon"><use href="#i-{{ course.subject.icon }}"/></svg></span><div><strong>{{ course.title }}</strong><div class="muted small">{{ course.subject.name }} · {{ course.get_level_display }}</div></div></div>
+      <div class="summary-line"><span>Full course access</span><span>K{{ course.price|floatformat:2 }}</span></div>
+      <div class="summary-line"><span>Fees</span><span>K0.00</span></div>
+      <div class="summary-line total"><span>Total</span><span>K{{ course.price|floatformat:2 }}</span></div>
+      <div class="secure-note"><svg class="icon"><use href="#i-shield"/></svg>You only pay once you approve on your phone. We never see your PIN.</div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

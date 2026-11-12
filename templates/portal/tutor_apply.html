@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Tutor verification · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:860px">
+  <div class="page-head"><span class="eyebrow">Tutor verification</span><h1>Your teaching credentials</h1>
+    <p class="lead">Parents and students trust Catch Up because every teacher is checked. We need your TCZ registration, a degree or diploma, your ID, and the subjects you specialise in.</p></div>
+  <div class="verify-status status-{{ profile.status }}">
+    <svg class="icon"><use href="#i-{% if profile.status == 'approved' %}check-circle{% elif profile.status == 'rejected' %}alert{% elif profile.status == 'submitted' %}clock{% else %}info{% endif %}"/></svg>
+    <div><strong>{{ profile.get_status_display }}</strong>
+      <div class="small">{% if profile.status == 'approved' %}You're verified. You can publish courses and earn from them.{% elif profile.status == 'submitted' %}Submitted {{ profile.submitted_at|timesince }} ago. We'll email you when the review is done.{% elif profile.status == 'rejected' %}{{ profile.review_note }}{% else %}Fill in every section and upload your documents, then submit.{% endif %}</div>
+    </div>
+  </div>
+  <form method="post" enctype="multipart/form-data" class="card card-pad" style="margin:20px 0 48px" novalidate>{% csrf_token %}
+    <fieldset {% if locked %}disabled{% endif %} style="border:0;padding:0;margin:0">
+      {% include 'partials/form_fields.html' %}
+    </fieldset>
+    {% if profile.pk %}
+    <div class="doc-links small">
+      {% if profile.tcz_certificate %}<a href="{% url 'portal:tutor_document' profile.pk 'tcz_certificate' %}">View TCZ certificate</a>{% endif %}
+      {% if profile.degree_certificate %}<a href="{% url 'portal:tutor_document' profile.pk 'degree_certificate' %}">View degree</a>{% endif %}
+      {% if profile.id_document %}<a href="{% url 'portal:tutor_document' profile.pk 'id_document' %}">View ID</a>{% endif %}
+    </div>
+    {% endif %}
+    {% if not locked %}
+    <div class="row" style="margin-top:18px">
+      <button type="submit" class="btn btn-outline" name="save">Save draft</button>
+      <button type="submit" class="btn btn-primary" name="submit">Submit for review</button>
+    </div>
+    {% elif profile.status == 'approved' %}
+    <a href="{% url 'courses:new_course' %}" class="btn btn-primary" style="margin-top:12px"><svg class="icon"><use href="#i-plus"/></svg>Create a course</a>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

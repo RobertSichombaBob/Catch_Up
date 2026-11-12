@@ -1,0 +1,7 @@
+Your payment didn't go through
+
+Hi {{ user.first_name|default:"there" }}, we couldn't complete your payment for {{ course.title }}.
+Reason: {{ payment.failure_message|default:"The payment was not completed." }}
+No money was taken. Try again: {{ action_url }}
+
+Reference: {{ payment.reference }}

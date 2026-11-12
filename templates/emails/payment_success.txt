@@ -1,0 +1,11 @@
+Payment received. You're in!
+
+Hi {{ user.first_name|default:"there" }}, the full {{ course.title }} course is now unlocked.
+
+Reference: {{ payment.reference }}
+Amount: K{{ payment.amount|floatformat:2 }}
+Paid with: {{ payment.get_network_display }} {{ payment.phone_display }}
+Date: {{ payment.completed_at|date:"j M Y, H:i" }}
+
+Start learning: {{ action_url }}
+Keep this email as your receipt.

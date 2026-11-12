@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Privacy policy · Catch Up{% endblock %}
+{% block content %}
+<div class="container page-content">
+  <span class="eyebrow">Legal</span>
+  <h1>Privacy policy</h1>
+  <div class="alert alert-warning" style="margin-bottom:20px"><svg class="icon"><use href="#i-alert"/></svg><span>Template text. Review it against the Zambia Data Protection Act before launch.</span></div>
+  <h2>What we collect</h2><p>Your name, email, study level and institution; the mobile money number you pay with; and which lessons you complete.</p>
+  <h2>Why</h2><p>To run your account, take payments, show your progress, and send you notifications you can switch off in your profile.</p>
+  <h2>Who we share it with</h2><p>Our payment provider (to process mobile money payments), our email provider (to deliver emails) and our hosting provider. We never sell your data.</p>
+  <h2>Your rights</h2><p>You can ask to see, correct or delete your data by emailing <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.</p>
+</div>
+{% endblock %}

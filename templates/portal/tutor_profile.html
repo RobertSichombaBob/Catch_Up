@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ tutor.display_name }} · Catch Up tutor{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card card-pad profile-hero" style="margin-top:28px">
+    {% if tutor.photo %}<img src="{{ tutor.photo.url }}" alt="" class="avatar avatar-img" style="width:96px;height:96px">{% else %}<span class="avatar" style="width:96px;height:96px;font-size:1.8rem">{{ tutor.initials }}</span>{% endif %}
+    <div>
+      <span class="badge badge-brand"><svg class="icon" style="width:14px;height:14px"><use href="#i-shield"/></svg>Verified teacher</span>
+      <h1 style="font-size:2rem;margin:8px 0 4px">{{ tutor.display_name }}</h1>
+      <p class="lead" style="margin:0 0 8px">{{ tutor.headline }}</p>
+      <div class="row muted small">
+        <span>{{ tutor.tutor_profile.get_qualification_display }}{% if tutor.tutor_profile.degree_title %}: {{ tutor.tutor_profile.degree_title }}{% endif %}</span>
+        <span>· {{ tutor.tutor_profile.years_experience }} years teaching</span>
+        <span>· {{ students }} student{{ students|pluralize }}</span>
+        <span>· TCZ registered</span>
+      </div>
+    </div>
+  </div>
+  {% if tutor.bio %}<div class="card card-pad" style="margin-top:18px"><h2 style="font-size:1.2rem">About</h2><p style="margin:0">{{ tutor.bio|linebreaksbr }}</p></div>{% endif %}
+  <h2 style="font-size:1.3rem;margin-top:32px">Courses</h2>
+  <div class="grid grid-3" style="margin-bottom:64px">{% for course in courses %}{% include 'partials/course_card.html' %}{% empty %}<p class="muted">No published courses yet.</p>{% endfor %}</div>
+</div>
+{% endblock %}

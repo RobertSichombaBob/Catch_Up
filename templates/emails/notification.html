@@ -1,0 +1,7 @@
+{% extends 'emails/base_email.html' %}
+{% block body %}
+<p style="margin:0 0 12px;">Hi {{ user.first_name|default:"there" }},</p>
+<h1 style="font-size:20px;color:#0d1b2a;margin:0 0 12px;">{{ title }}</h1>
+<p style="margin:0 0 12px;white-space:pre-line;">{{ body }}</p>
+{% if action_url %}{% include 'emails/_button.html' with href=action_url label="Open Catch Up" %}{% endif %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Parent dashboard · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head row-between">
+    <div><span class="eyebrow">Parent dashboard</span><h1>Hello, {{ user.first_name|default:user.display_name }}</h1></div>
+    <a href="{% url 'portal:parent_link' %}" class="btn btn-outline"><svg class="icon"><use href="#i-plus"/></svg>Link a child</a>
+  </div>
+  {% for c in children %}
+  <section class="card card-pad child-card" data-reveal>
+    <div class="row-between">
+      <div class="row">{% if c.child.photo %}<img src="{{ c.child.photo.url }}" alt="" class="avatar avatar-img avatar-lg">{% else %}<span class="avatar avatar-lg">{{ c.child.initials }}</span>{% endif %}
+        <div><h2 style="font-size:1.35rem;margin:0">{{ c.child.display_name }}</h2><span class="muted small">{{ c.child.get_year_display|default:c.child.get_level_display }}{% if c.last_active %} · Last active {{ c.last_active|naturaltime }}{% endif %}</span></div></div>
+      <a href="{% url 'courses:catalog' %}" class="btn btn-sm btn-primary">Buy a course for {{ c.child.first_name }}</a>
+    </div>
+    {% for e in c.needs_renewal %}<div class="alert alert-warning" style="margin-top:14px"><svg class="icon"><use href="#i-clock"/></svg><span>{{ e.course.title }} ends in {{ e.days_left }} day{{ e.days_left|pluralize }}. <a href="{% url 'payments:checkout' e.course.slug %}">Renew for K{{ e.course.price|floatformat:0 }}</a></span></div>{% endfor %}
+    {% for e in c.expired %}<div class="alert alert-danger" style="margin-top:14px"><svg class="icon"><use href="#i-alert"/></svg><span>{{ e.course.title }} access has ended. <a href="{% url 'payments:checkout' e.course.slug %}">Renew</a></span></div>{% endfor %}
+    <div class="stat-grid" style="margin:18px 0">
+      <div class="stat card"><div class="label">Courses</div><div class="value">{{ c.enrollments|length }}</div></div>
+      <div class="stat card"><div class="label">Lessons this week</div><div class="value">{{ c.lessons_this_week }}</div></div>
+      <div class="stat card"><div class="label">Attendance</div><div class="value" data-child-attendance>{{ c.attendance|default:"–" }}{% if c.attendance is not None %}%{% endif %}</div></div>
+      <div class="stat card"><div class="label">Average grade</div><div class="value">{{ c.average|default:"–" }}{% if c.average is not None %}%{% endif %}</div></div>
+    </div>
+    <div class="grid grid-2">
+      <div>
+        <h3 style="font-size:1rem">Course progress</h3>
+        {% for e in c.enrollments %}
+        <div style="margin-bottom:12px"><div class="row-between small"><a href="{{ e.course.get_absolute_url }}">{{ e.course.title }}</a><span class="muted">{{ e.percent }}%</span></div><div class="progress"><span style="width:{{ e.percent }}%"></span></div></div>
+        {% empty %}<p class="muted small">No courses yet.</p>{% endfor %}
+        <h3 style="font-size:1rem;margin-top:18px">Recent grades</h3>
+        <ul class="plain-list small">{% for s in c.grades %}<li><span>{{ s.assessment.title }}</span><strong>{{ s.percent }}%</strong></li>{% empty %}<li class="muted">No marked work yet.</li>{% endfor %}</ul>
+      </div>
+      <div>
+        <div class="chart-card" data-chart="child" data-src="{% url 'api:child_overview' c.child.pk %}" data-series="lessons_per_week" data-title="Lessons completed per week"></div>
+        <h3 style="font-size:1rem;margin-top:18px">Payments</h3>
+        <ul class="plain-list small">{% for p in c.payments %}<li><span>{{ p.course.title }} · {{ p.created_at|date:"j M" }}</span><strong>K{{ p.amount|floatformat:0 }} · {{ p.get_status_display }}</strong></li>{% empty %}<li class="muted">No payments yet.</li>{% endfor %}</ul>
+      </div>
+    </div>
+    <form method="post" action="{% url 'portal:unlink' c.link_id %}" style="margin-top:12px">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Remove link</button></form>
+  </section>
+  {% empty %}
+  <div class="card empty" style="margin:24px 0 56px"><svg class="icon"><use href="#i-link"/></svg><h3 style="color:var(--ink)">Link your child to get started</h3><p>Ask your child for the invite code on their profile page.</p><a href="{% url 'portal:parent_link' %}" class="btn btn-primary">Link a child</a></div>
+  {% endfor %}
+</div>
+{% endblock %}

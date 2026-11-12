@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Tutor reviews · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head"><span class="eyebrow">Control room</span><h1>Tutor verification</h1></div>
+  <div class="filters">
+    {% for value, label in statuses %}<a href="?status={{ value }}" class="chip {% if status == value %}active{% endif %}">{{ label }}</a>{% endfor %}
+    <a href="?status=all" class="chip {% if status == 'all' %}active{% endif %}">All</a>
+  </div>
+  <div class="card table-wrap" style="margin-bottom:56px">
+    <table class="table"><thead><tr><th>Tutor</th><th>TCZ number</th><th>Qualification</th><th>Subjects</th><th>Status</th><th></th></tr></thead><tbody>
+      {% for p in profiles %}<tr><td><strong>{{ p.user.display_name }}</strong><div class="muted small">{{ p.user.email }}</div></td><td>{{ p.tcz_number|default:"–" }}</td><td>{{ p.get_qualification_display|default:"–" }}</td><td class="small">{% for s in p.specialisations.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td><td><span class="badge status-badge-{{ p.status }}">{{ p.get_status_display }}</span></td><td><a class="btn btn-sm btn-outline" href="{% url 'portal:admin_tutor' p.pk %}">Review</a></td></tr>
+      {% empty %}<tr><td colspan="6" class="muted">No tutors in this list.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+{% endblock %}

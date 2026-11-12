@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}{% if obj %}Edit question{% else %}New question{% endif %} · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card" style="max-width:680px">
+  <a href="{% url 'classroom:assessment_edit' course.slug assessment.pk %}" class="small">&larr; {{ assessment.title }}</a>
+  <h1>{% if obj %}Edit question{% else %}New question{% endif %}</h1>
+  <p class="muted small">Write maths as <code>\( x^2 \)</code> inline, or <code>\[ \int_0^1 x\,dx \]</code> on its own line.</p>
+  <form method="post" novalidate>{% csrf_token %}{% include 'partials/form_fields.html' %}<button class="btn btn-primary btn-block btn-lg">Save question</button></form>
+</div>
+{% endblock %}

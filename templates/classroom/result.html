@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Result · {{ a.title }} · Catch Up{% endblock %}
+{% block head %}{% include 'partials/katex.html' %}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:820px">
+  <div class="page-head"><a href="{{ a.course.get_absolute_url }}" class="small">&larr; {{ a.course.title }}</a><h1>{{ a.title }}</h1></div>
+  <div class="card card-pad result-hero {% if sub.status == 'graded' %}{% if sub.passed %}is-pass{% else %}is-fail{% endif %}{% endif %}" data-reveal>
+    {% if sub.status == 'graded' %}
+      <div class="result-score"><span class="result-percent">{{ sub.percent|floatformat:"-1" }}%</span><span class="grade-pill grade-{{ grade|slugify }}">{{ grade }}</span></div>
+      <div>
+        <h2>{% if sub.passed %}Well done, you passed.{% else %}Not quite there yet.{% endif %}</h2>
+        <p class="muted">{{ sub.score|floatformat:"-1" }} out of {{ a.total_marks }} marks · pass mark {{ a.pass_mark }}% · attempt {{ sub.attempt }}</p>
+      </div>
+    {% else %}
+      <div class="result-score"><svg class="icon icon-lg"><use href="#i-clock"/></svg></div>
+      <div><h2>Submitted. Waiting for your tutor to mark it.</h2><p class="muted">You'll get a notification (and an email) when your marks are ready.</p></div>
+    {% endif %}
+  </div>
+  {% if sub.feedback %}<div class="card card-pad" style="margin-top:20px"><h3 class="card-title"><svg class="icon"><use href="#i-message"/></svg>Feedback from your tutor</h3><p>{{ sub.feedback|linebreaksbr }}</p></div>{% endif %}
+  <div class="row" style="margin:20px 0;flex-wrap:wrap;gap:10px">
+    {% if next_lesson and sub.status == 'graded' and sub.passed or next_lesson and not a.must_pass_to_progress %}<a class="btn btn-primary" href="{% url 'courses:lesson' a.course.slug next_lesson.pk %}">Next lesson: {{ next_lesson.title|truncatechars:40 }} <svg class="icon"><use href="#i-arrow-right"/></svg></a>{% endif %}
+    {% if left > 0 and sub.student == request.user %}<a class="btn btn-outline" href="{{ a.get_absolute_url }}">Try again ({{ left }} left)</a>{% endif %}
+    <a class="btn btn-ghost" href="{% url 'classroom:my_grades' %}">All my grades</a>
+  </div>
+  {% if a.show_answers_after and sub.status == 'graded' or request.user != sub.student %}
+  <div class="card card-pad">
+    <h3 class="card-title">Answers</h3>
+    {% for r in rows %}
+    <div class="assess-box">
+      <div class="row-between"><strong>Question {{ forloop.counter }}</strong>{% if r.got is not None %}<span class="{% if r.got >= r.q.marks %}pos{% elif r.got > 0 %}muted{% else %}neg{% endif %}">{{ r.got }} / {{ r.q.marks }}</span>{% endif %}</div>
+      <div class="q-text math">{{ r.q.text|linebreaksbr }}</div>
+      <p class="small">Your answer: <strong>{% if r.q.kind == 'mcq' and r.answer %}option {{ r.answer }}{% else %}{{ r.answer|default:"–" }}{% endif %}</strong></p>
+      {% if r.q.auto_marked %}<p class="small muted">Correct answer: {% if r.q.kind == 'mcq' %}option {{ r.q.answer }}{% else %}{{ r.q.answer }}{% endif %}</p>{% endif %}
+      {% if r.q.explanation %}<div class="small math explain">{{ r.q.explanation|linebreaksbr }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

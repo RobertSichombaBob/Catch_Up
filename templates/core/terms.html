@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Terms of use · Catch Up{% endblock %}
+{% block content %}
+<div class="container page-content">
+  <span class="eyebrow">Legal</span>
+  <h1>Terms of use</h1>
+  <div class="alert alert-warning" style="margin-bottom:20px"><svg class="icon"><use href="#i-alert"/></svg><span>Template text. Have a lawyer review these terms before launch.</span></div>
+  <h2>1. Your account</h2><p>You must give accurate details and keep your password private. One account is for one person.</p>
+  <h2>2. Subscriptions</h2><p>Each course has the monthly price shown at checkout. Payment is taken through mobile money and gives 30 days of access from the moment it is confirmed. Mobile money cannot be charged automatically, so access ends unless you renew; we remind you before it does. Parents and guardians may pay on behalf of a linked student.</p><h2>2a. Teachers</h2><p>Teachers must be registered with the Teaching Council of Zambia, hold a relevant qualification and pass our document checks before they can publish. Teachers receive 50% of each subscription to their course after payment-provider fees.</p>
+  <h2>3. Refunds</h2><p>If you were charged but did not get access, or were charged twice, contact us and we will refund or fix it. Other refund requests within 7 days of purchase are considered case by case.</p>
+  <h2>4. Acceptable use</h2><p>Course content is for your personal study. Do not copy, resell or share your account or the course materials.</p>
+  <h2>5. Changes</h2><p>We may update these terms. We will notify you of important changes.</p>
+  <h2>6. Contact</h2><p><a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a></p>
+</div>
+{% endblock %}

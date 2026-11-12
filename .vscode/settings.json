@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "files.associations": { "**/templates/**/*.html": "django-html" },
+  "typescript.tsdk": "frontend/node_modules/typescript/lib"
+}

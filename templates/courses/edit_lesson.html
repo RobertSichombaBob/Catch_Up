@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}{% if lesson %}Edit {{ lesson.title }}{% else %}New lesson{% endif %} · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px">
+  <div class="page-head"><span class="eyebrow">{{ course.title }}</span><h1>{% if lesson %}Edit lesson{% else %}New lesson{% endif %}</h1></div>
+  {% if not form.fields.module.queryset.exists %}
+    <div class="alert alert-warning"><svg class="icon"><use href="#i-alert"/></svg><span>This course has no modules yet. <a href="{% url 'core:tutor_dashboard' %}">Add a module</a> first.</span></div>
+  {% else %}
+  <form method="post" class="card card-pad" style="margin-bottom:56px" novalidate>{% csrf_token %}
+    {% include 'partials/form_fields.html' %}
+    <div class="row"><button type="submit" class="btn btn-primary">Save lesson</button>{% if lesson %}<a href="{{ lesson.get_absolute_url }}" class="btn btn-outline">Cancel</a>{% endif %}</div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

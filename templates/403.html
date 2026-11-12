@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Not allowed · Catch Up{% endblock %}
+{% block content %}
+<div class="container status-wrap">
+  <div class="status-icon failed"><svg class="icon"><use href="#i-lock"/></svg></div>
+  <h1 style="font-size:2rem">You don't have access to this page</h1>
+  <p class="muted">If you think this is a mistake, contact {{ SUPPORT_EMAIL }}.</p>
+  <a href="{% url 'core:home' %}" class="btn btn-primary">Go home</a>
+</div>
+{% endblock %}

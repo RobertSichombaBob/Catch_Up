@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}{{ info.title }} · Catch Up{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-side portal-{{ portal }}" aria-hidden="true">
+    <span class="portal-icon lg"><svg class="icon"><use href="#i-{{ info.icon }}"/></svg></span>
+    <h2>{{ info.title|cut:" sign-in" }} portal</h2>
+    <p>{{ info.lead }}</p>
+    <ul class="auth-points">
+      {% if portal == 'student' %}<li>Lessons, notes and tutorial sheets</li><li>Live classes and assessments</li><li>Grades and progress</li>
+      {% elif portal == 'parent' %}<li>Progress and attendance reports</li><li>Grades as soon as they're marked</li><li>Pay for your child with mobile money</li>
+      {% elif portal == 'tutor' %}<li>Create courses and upload files</li><li>Attendance, assessments and gradebook</li><li>50% of every subscription</li>
+      {% else %}<li>Revenue and the 50/50 split</li><li>Tutor verification</li><li>Analytics and forecasts</li>{% endif %}
+    </ul>
+  </div>
+  <div class="card form-card auth-card">
+    <h1>{{ info.title }}</h1>
+    <p class="muted">Use the email and password for your account.</p>
+    <form method="post" novalidate>{% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% include 'partials/form_fields.html' %}
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Sign in</button>
+    </form>
+    <div class="form-foot"><a href="{% url 'accounts:password_reset' %}">Forgot your password?</a></div>
+    {% if info.signup %}<div class="form-foot"><a href="{% url info.signup %}">{{ info.signup_label }}</a></div>{% endif %}
+    <div class="portal-switch">
+      {% for key, p in portals.items %}{% if key != portal %}<a href="{% if key == 'student' %}{% url 'portal:student_login' %}{% elif key == 'parent' %}{% url 'portal:parent_login' %}{% elif key == 'tutor' %}{% url 'portal:tutor_login' %}{% else %}{% url 'portal:admin_login' %}{% endif %}">{{ p.title|cut:" sign-in" }}</a>{% endif %}{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

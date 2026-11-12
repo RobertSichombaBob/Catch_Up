@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Link your child · Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <span class="eyebrow">Parents</span>
+  <h1>Link your child's account</h1>
+  <p class="muted">Your child can find their 6-character invite code on their <strong>Profile</strong> page. Linking lets you see their progress, attendance and grades, and pay for their courses.</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include 'partials/form_fields.html' %}
+    <button type="submit" class="btn btn-primary btn-block btn-lg">Link account</button>
+  </form>
+  <div class="form-foot">Your child doesn't have an account yet? They can <a href="{% url 'accounts:signup' %}">create one free</a>.</div>
+</div>
+{% endblock %}

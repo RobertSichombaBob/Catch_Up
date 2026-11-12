@@ -1,0 +1,15 @@
+<a href="{{ course.get_absolute_url }}" class="card card-hover course-card" data-reveal>
+  {% include 'partials/cover.html' %}
+  <div class="course-body">
+    <h3>{{ course.title }}</h3>
+    <p>{{ course.summary }}</p>
+    <div class="course-meta">
+      <span><svg class="icon"><use href="#i-layers"/></svg>{{ course.get_level_display }}</span>
+      {% if course.lesson_count %}<span><svg class="icon"><use href="#i-book"/></svg>{{ course.lesson_count }} lessons</span>{% endif %}
+    </div>
+    <div class="course-foot">
+      <span class="tutor-mini">{% if course.tutor.photo %}<img src="{{ course.tutor.photo.url }}" alt="" class="avatar avatar-img">{% else %}<span class="avatar">{{ course.tutor.initials }}</span>{% endif %}{{ course.tutor.display_name }}{% if course.tutor.is_verified_tutor %}<svg class="icon verified" aria-label="Verified teacher"><use href="#i-shield"/></svg>{% endif %}</span>
+      {% if course.pk in enrolled_ids %}<span class="badge badge-brand">Enrolled</span>{% else %}<span class="price">K{{ course.price|floatformat:0 }}<small>/mo</small></span>{% endif %}
+    </div>
+  </div>
+</a>

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Sign in · Catch Up{% endblock %}
+{% block content %}
+<section class="section-sm">
+  <div class="container" style="max-width:960px">
+    <div class="section-head center"><span class="eyebrow">Welcome</span><h1 style="font-size:clamp(1.9rem,3.5vw,2.6rem)">Who's signing in?</h1><p class="lead">Each portal opens the tools made for you.</p></div>
+    <div class="portal-grid">
+      {% for key, p in portals.items %}
+      <a class="card card-hover portal-card portal-{{ key }}" data-reveal href="{% if key == 'student' %}{% url 'portal:student_login' %}{% elif key == 'parent' %}{% url 'portal:parent_login' %}{% elif key == 'tutor' %}{% url 'portal:tutor_login' %}{% else %}{% url 'portal:admin_login' %}{% endif %}">
+        <span class="portal-icon"><svg class="icon"><use href="#i-{{ p.icon }}"/></svg></span>
+        <h3>{{ p.title|cut:" sign-in" }}</h3>
+        <p class="muted small">{{ p.lead }}</p>
+        <span class="portal-go">Sign in <svg class="icon"><use href="#i-arrow-right"/></svg></span>
+      </a>
+      {% endfor %}
+    </div>
+    <p class="center muted small" style="margin-top:28px">New here? <a href="{% url 'accounts:signup' %}">Student account</a> · <a href="{% url 'portal:parent_signup' %}">Parent account</a> · <a href="{% url 'portal:tutor_signup' %}">Apply to teach</a> · <a href="{% url 'schools:index' %}">Register a school</a></p>
+  </div>
+</section>
+{% endblock %}

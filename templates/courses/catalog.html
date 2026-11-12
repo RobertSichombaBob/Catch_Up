@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Courses · Catch Up{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head">
+    <span class="eyebrow">Course library</span>
+    <h1>Find your course</h1>
+    <p class="lead">A-level and first- and second-year university courses from verified teachers. Every course has a free preview lesson; subscriptions start at K{{ COURSE_PRICE }} a month.</p>
+  </div>
+  <div class="filters">
+    <a href="?{% if level %}level={{ level }}{% endif %}" class="chip {% if not subject_slug %}active{% endif %}">All subjects</a>
+    {% for s in subjects %}<a href="?subject={{ s.slug }}{% if level %}&level={{ level }}{% endif %}" class="chip {% if s.slug == subject_slug %}active{% endif %}">{{ s.name }}</a>{% endfor %}
+  </div>
+  <div class="filters" style="margin-top:-14px">
+    <a href="?{% if subject_slug %}subject={{ subject_slug }}{% endif %}" class="chip {% if not level %}active{% endif %}">All levels</a>
+    <a href="?level=a_level{% if subject_slug %}&subject={{ subject_slug }}{% endif %}" class="chip {% if level == 'a_level' %}active{% endif %}">A-level</a>
+    <a href="?level=university{% if subject_slug %}&subject={{ subject_slug }}{% endif %}" class="chip {% if level == 'university' %}active{% endif %}">University</a>
+    <a href="?year=as{% if subject_slug %}&subject={{ subject_slug }}{% endif %}" class="chip {% if year == 'as' %}active{% endif %}">AS</a>
+    <a href="?year=a2{% if subject_slug %}&subject={{ subject_slug }}{% endif %}" class="chip {% if year == 'a2' %}active{% endif %}">A2</a>
+    <a href="?year=uni1{% if subject_slug %}&subject={{ subject_slug }}{% endif %}" class="chip {% if year == 'uni1' %}active{% endif %}">Uni year 1</a>
+    <a href="?year=uni2{% if subject_slug %}&subject={{ subject_slug }}{% endif %}" class="chip {% if year == 'uni2' %}active{% endif %}">Uni year 2</a>
+    <form class="search-box" method="get" role="search">
+      {% if subject_slug %}<input type="hidden" name="subject" value="{{ subject_slug }}">{% endif %}
+      {% if level %}<input type="hidden" name="level" value="{{ level }}">{% endif %}
+      <svg class="icon"><use href="#i-search"/></svg>
+      <input type="search" name="q" value="{{ q }}" placeholder="Search courses and topics" aria-label="Search courses">
+    </form>
+  </div>
+  {% if courses %}
+    <div class="grid grid-3" style="margin-bottom:64px">{% for course in courses %}{% include 'partials/course_card.html' %}{% endfor %}</div>
+  {% else %}
+    <div class="card empty" style="margin-bottom:64px"><svg class="icon"><use href="#i-search"/></svg><h3 style="color:var(--ink)">No courses match that search</h3><p>Try another word, or <a href="{% url 'courses:catalog' %}">see every course</a>.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

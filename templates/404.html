@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Page not found · Catch Up{% endblock %}
+{% block content %}
+<div class="container status-wrap">
+  <div class="status-icon pending"><svg class="icon"><use href="#i-search"/></svg></div>
+  <h1 style="font-size:2rem">We couldn't find that page</h1>
+  <p class="muted">The link may be old, or the page may have moved.</p>
+  <div class="row" style="justify-content:center"><a href="{% url 'core:home' %}" class="btn btn-primary">Go home</a><a href="{% url 'courses:catalog' %}" class="btn btn-outline">Browse courses</a></div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ item.title }} · {{ course.title }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/katex/katex.min.css' %}">{% endblock %}
+{% block content %}
+<div class="container" style="max-width:980px">
+  <div class="page-head">
+    <a href="{{ course.get_absolute_url }}" class="small">&larr; {{ course.title }}</a>
+    <h1>{{ item.title }}</h1>
+    <div class="row muted small"><span class="badge">{{ item.get_category_display }}</span><span>{{ item.get_kind_display }} · {{ item.size|filesizeformat }}</span>
+      {% if item.allow_download %}<a href="{% url 'courses:material_file' course.slug item.pk %}" class="btn btn-sm btn-outline"><svg class="icon"><use href="#i-download"/></svg>Download original</a>{% endif %}</div>
+    {% if item.description %}<p class="muted" style="margin-top:8px">{{ item.description }}</p>{% endif %}
+  </div>
+  <div class="card viewer" style="margin:18px 0 56px">
+    {% if item.kind == 'pdf' %}
+      <iframe src="{% url 'courses:material_file' course.slug item.pk %}?inline=1#view=FitH" title="{{ item.title }}" class="pdf-frame" loading="lazy"></iframe>
+      <p class="small muted center" style="padding:10px">PDF not showing on your phone? {% if item.allow_download %}<a href="{% url 'courses:material_file' course.slug item.pk %}">Download it</a>.{% else %}Try a computer, or ask your tutor to allow downloads.{% endif %}</p>
+    {% elif item.kind == 'image' %}
+      <img src="{% url 'courses:material_file' course.slug item.pk %}?inline=1" alt="{{ item.title }}" style="margin:0 auto">
+    {% elif item.html %}
+      <article class="prose {% if item.kind == 'slides' %}slides{% endif %}" id="lesson-content" style="padding:28px">{{ item.html|safe }}</article>
+    {% else %}
+      <div class="empty"><svg class="icon"><use href="#i-file"/></svg><p>This file can't be shown in the browser.</p>{% if item.allow_download %}<a href="{% url 'courses:material_file' course.slug item.pk %}" class="btn btn-primary">Download</a>{% endif %}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script defer src="{% static 'vendor/katex/katex.min.js' %}"></script>
+<script defer src="{% static 'vendor/katex/contrib/auto-render.min.js' %}"></script>
+{% endblock %}

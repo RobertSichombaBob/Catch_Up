@@ -1,0 +1,64 @@
+{% load static %}
+<header class="site-header" data-header>
+  <div class="container header-inner">
+    <a href="{% if user.is_authenticated %}{% url user.home_url_name %}{% else %}{% url 'core:home' %}{% endif %}" class="logo" aria-label="Catch Up home">
+      <img src="{% static 'img/logo.svg' %}" class="logo-mark" alt="" width="34" height="34">Catch Up
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="{% url 'courses:catalog' %}" {% if request.path|slice:':9' == '/courses/' %}class="active"{% endif %}>Courses</a>
+      <a href="{% url 'portal:tutors' %}" {% if request.path|slice:':8' == '/tutors/' %}class="active"{% endif %}>Tutors</a>
+      <a href="{% url 'schools:index' %}" {% if request.path|slice:':9' == '/schools/' %}class="active"{% endif %}>For schools</a>
+      <a href="{% url 'core:pricing' %}" {% if request.path == '/pricing/' %}class="active"{% endif %}>Pricing</a>
+      {% if user.is_authenticated %}
+        {% if user.is_tutor or user.is_platform_admin or user.is_staff %}<a href="{% url 'core:tutor_dashboard' %}">Studio</a>{% endif %}
+        {% if user.is_platform_admin or user.is_staff %}<a href="{% url 'portal:admin_home' %}">Control room</a>{% endif %}
+      {% endif %}
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn menu-toggle" type="button" aria-label="Menu" aria-expanded="false" data-menu-toggle><svg class="icon"><use href="#i-menu"/></svg></button>
+      {% if user.is_authenticated %}
+      <div class="dropdown" data-dropdown>
+        <button class="icon-btn" type="button" aria-label="Notifications{% if unread_count %}, {{ unread_count }} unread{% endif %}" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
+          <svg class="icon"><use href="#i-bell"/></svg>{% if unread_count %}<span class="badge-dot">{{ unread_count }}</span>{% endif %}
+        </button>
+        <div class="dropdown-menu notif-menu" role="menu">
+          <div class="dropdown-head row-between"><strong>Notifications</strong>
+            {% if unread_count %}<form method="post" action="{% url 'notifications:mark_all_read' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-ghost btn-sm" type="submit">Mark all read</button></form>{% endif %}
+          </div>
+          {% for n in recent_notifications %}
+          <form method="post" action="{% url 'notifications:open' n.pk %}">{% csrf_token %}
+            <button type="submit" class="menu-item notif-item {% if not n.is_read %}unread{% endif %}"><span class="t">{{ n.title }}</span><span class="b">{{ n.body }}</span></button>
+          </form>
+          {% empty %}<p class="muted small" style="padding:10px">You're all caught up.</p>{% endfor %}
+          <hr><a href="{% url 'notifications:inbox' %}">See all notifications</a>
+        </div>
+      </div>
+      <div class="dropdown" data-dropdown>
+        <button class="avatar-btn" type="button" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
+          {% if user.photo %}<img src="{{ user.photo.url }}" alt="" class="avatar avatar-img">{% else %}<span class="avatar">{{ user.initials }}</span>{% endif %}
+        </button>
+        <div class="dropdown-menu" role="menu">
+          <div class="dropdown-head"><strong>{{ user.display_name }}</strong><span class="muted small">{{ user.get_role_display }}</span></div>
+          <a href="{% url user.home_url_name %}"><svg class="icon"><use href="#i-home"/></svg>My dashboard</a>
+          {% if user.is_student %}<a href="{% url 'classroom:my_classes' %}"><svg class="icon"><use href="#i-calendar"/></svg>Classes and bookings</a>
+          <a href="{% url 'classroom:my_grades' %}"><svg class="icon"><use href="#i-award"/></svg>My grades</a>
+          <a href="{% url 'payments:history' %}"><svg class="icon"><use href="#i-wallet"/></svg>Payments</a>{% endif %}
+          {% if user.is_parent %}<a href="{% url 'portal:parent_link' %}"><svg class="icon"><use href="#i-link"/></svg>Link a child</a>{% endif %}
+          {% if user.is_tutor %}<a href="{% url 'classroom:tutor_home' %}"><svg class="icon"><use href="#i-users"/></svg>Classes and grading</a>
+          <a href="{% url 'portal:tutor_apply' %}"><svg class="icon"><use href="#i-shield"/></svg>Verification</a>
+          <a href="{% url 'ledger:earnings' %}"><svg class="icon"><use href="#i-wallet"/></svg>Earnings</a>{% endif %}
+          {% if user.is_platform_admin or user.is_staff %}<a href="{% url 'portal:admin_home' %}"><svg class="icon"><use href="#i-chart"/></svg>Control room</a>
+          <a href="/admin/"><svg class="icon"><use href="#i-settings"/></svg>Django admin</a>{% endif %}
+          {% if my_schools %}{% for s in my_schools %}<a href="{% url 'schools:detail' s.slug %}"><svg class="icon"><use href="#i-graduation"/></svg>{{ s.name }}</a>{% endfor %}{% endif %}
+          <a href="{% url 'accounts:profile' %}"><svg class="icon"><use href="#i-user"/></svg>Profile and settings</a>
+          <hr>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="menu-item"><svg class="icon"><use href="#i-logout"/></svg>Sign out</button></form>
+        </div>
+      </div>
+      {% else %}
+      <a href="{% url 'portal:choose' %}" class="btn btn-ghost hide-sm">Sign in</a>
+      <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-sm">Get started</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

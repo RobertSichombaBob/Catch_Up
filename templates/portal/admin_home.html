@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Control room · Catch Up{% endblock %}
+{% block content %}
+<div class="container wide">
+  <div class="page-head row-between">
+    <div><span class="eyebrow">Control room</span><h1>Platform overview</h1><p class="muted" style="margin:0">Live numbers, the 50/50 split, and what the models are seeing.</p></div>
+    <div class="row"><a href="{% url 'portal:admin_tutors' %}" class="btn btn-outline">Tutor reviews{% if pending_tutors %} <span class="badge badge-accent">{{ pending_tutors|length }}</span>{% endif %}</a><a href="/admin/" class="btn btn-dark">Django admin</a></div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="card stat kpi"><div class="label">Revenue, last 30 days</div><div class="value">K{{ revenue_30|floatformat:0|intcomma }}</div><div class="sub">K{{ revenue_total|floatformat:0|intcomma }} all time</div></div>
+    <div class="card stat kpi"><div class="label">Monthly recurring revenue</div><div class="value">K{{ kpis.mrr|floatformat:0|intcomma }}</div><div class="sub">{{ active_subscriptions }} active subscriptions</div></div>
+    <div class="card stat kpi"><div class="label">Platform share (50%)</div><div class="value">K{{ split.platform|floatformat:0|intcomma }}</div><div class="sub">Tutors earned K{{ split.tutor|floatformat:0|intcomma }}</div></div>
+    <div class="card stat kpi"><div class="label">Active learners (7 days)</div><div class="value">{{ active_learners }}</div><div class="sub">{{ kpis.lessons_7d }} lessons completed</div></div>
+  </div>
+
+  <div class="kpi-grid small-kpis">
+    <div class="card stat"><div class="label">Students</div><div class="value">{{ roles.students }}</div></div>
+    <div class="card stat"><div class="label">Parents</div><div class="value">{{ roles.parents }}</div></div>
+    <div class="card stat"><div class="label">Tutors</div><div class="value">{{ roles.tutors }}</div></div>
+    <div class="card stat"><div class="label">Schools awaiting approval</div><div class="value">{{ schools_pending }}</div></div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="card card-pad span-2">
+      <div class="row-between"><h2 class="card-title">Weekly revenue and 8-week forecast</h2><span class="badge badge-info">Holt smoothing</span></div>
+      <div class="chart-card" data-chart="admin-revenue" data-src="{% url 'api:admin_overview' %}"></div>
+      {% if forecast.ready %}<p class="small muted" style="margin:6px 0 0">Expected next 4 weeks: <strong>K{{ forecast.next_month|floatformat:0|intcomma }}</strong> (shaded band is the 80% range).</p>{% else %}<p class="small muted">{{ forecast.message }}</p>{% endif %}
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Where the money goes</h2>
+      <div class="chart-card" data-chart="admin-split" data-src="{% url 'api:admin_overview' %}"></div>
+      <ul class="plain-list small"><li><span>Platform</span><strong>K{{ split.platform|floatformat:2|intcomma }}</strong></li><li><span>Tutors</span><strong>K{{ split.tutor|floatformat:2|intcomma }}</strong></li><li><span>Provider fees</span><strong>K{{ split.fees|floatformat:2|intcomma }}</strong></li></ul>
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Payment success by network (30 days)</h2>
+      <table class="table compact"><thead><tr><th>Network</th><th>Payments</th><th>Success</th></tr></thead><tbody>
+        {% for n in by_network %}<tr><td><span class="net-chip net-{{ n.code }}"><i></i>{{ n.label }}</span></td><td>{{ n.total }}</td><td>{% if n.rate is not None %}<strong>{{ n.rate }}%</strong>{% else %}–{% endif %}</td></tr>{% endfor %}
+      </tbody></table>
+      {% if pay_insights.suspicious %}<div class="alert alert-warning small" style="margin-top:10px"><svg class="icon"><use href="#i-alert"/></svg><span>Unusual: {% for s in pay_insights.suspicious %}{{ s.user__email }} had {{ s.n }} failed payments today{% if not forloop.last %}; {% endif %}{% endfor %}.</span></div>{% endif %}
+      {% if pay_insights.spike %}<div class="alert alert-info small" style="margin-top:10px"><svg class="icon"><use href="#i-info"/></svg><span>Payment volume today ({{ pay_insights.spike.today }}) is far from usual ({{ pay_insights.spike.usual }}/day).</span></div>{% endif %}
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Payments by hour of day</h2>
+      <div class="chart-card" data-chart="admin-hours" data-src="{% url 'api:admin_overview' %}"></div>
+    </div>
+    <div class="card card-pad span-2">
+      <div class="row-between"><h2 class="card-title">Students at risk of dropping out</h2><span class="badge badge-info">Machine learning</span></div>
+      <table class="table compact"><thead><tr><th>Student</th><th>Course</th><th>Risk</th><th>Why</th></tr></thead><tbody>
+        {% for r in at_risk %}<tr><td>{{ r.student.display_name }}</td><td class="muted">{{ r.course.title }}</td><td><span class="risk risk-{{ r.level }}">{% widthratio r.risk 1 100 %}%</span></td><td class="small">{{ r.reasons|join:", " }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="muted">No students flagged right now.</td></tr>{% endfor %}
+      </tbody></table>
+      <div class="model-health" data-chart="admin-model" data-src="{% url 'api:admin_overview' %}"></div>
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Tutor applications</h2>
+      <ul class="plain-list">{% for p in pending_tutors %}<li><a href="{% url 'portal:admin_tutor' p.pk %}">{{ p.user.display_name }}</a><span class="muted small">{{ p.submitted_at|naturaltime }}</span></li>{% empty %}<li class="muted small">Nothing waiting.</li>{% endfor %}</ul>
+      <a href="/admin/ledger/payout/" class="btn btn-sm btn-outline" style="margin-top:12px">Tutor payouts</a>
+    </div>
+    <div class="card card-pad span-2">
+      <h2 class="card-title">Top courses</h2>
+      <table class="table compact"><thead><tr><th>Course</th><th>Tutor</th><th>Active students</th><th>Revenue</th></tr></thead><tbody>
+        {% for c in top_courses %}<tr><td><a href="{{ c.get_absolute_url }}">{{ c.title }}</a></td><td class="muted">{{ c.tutor.display_name }}</td><td>{{ c.students }}</td><td>K{{ c.revenue|default:0|floatformat:0|intcomma }}</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+    <div class="card card-pad">
+      <h2 class="card-title">Recent payments</h2>
+      <ul class="plain-list small">{% for p in recent_payments %}<li><span>{{ p.user.display_name }} · {{ p.course.title|truncatechars:24 }}</span><span class="pay-{{ p.status }}">K{{ p.amount|floatformat:0 }}</span></li>{% empty %}<li class="muted">No payments yet.</li>{% endfor %}</ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

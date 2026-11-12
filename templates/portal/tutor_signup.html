@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Teach on Catch Up{% endblock %}
+{% block content %}
+<div class="card form-card" style="max-width:560px">
+  <span class="eyebrow">For qualified teachers</span>
+  <h1>Apply to teach</h1>
+  <p class="muted">Earn 50% of every subscription to your courses. After you create your account, you'll upload your TCZ certificate, degree and ID. We verify every teacher before they can publish, so students and parents can trust them.</p>
+  <ol class="steps-mini">
+    <li><b>1</b><span>Create your account</span></li>
+    <li><b>2</b><span>Upload TCZ registration, degree and ID</span></li>
+    <li><b>3</b><span>We review in about 2 working days</span></li>
+    <li><b>4</b><span>Create courses, teach and get paid monthly</span></li>
+  </ol>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include 'partials/form_fields.html' %}
+    <button type="submit" class="btn btn-primary btn-block btn-lg">Create tutor account</button>
+  </form>
+  <div class="form-foot">Already applied? <a href="{% url 'portal:tutor_login' %}">Sign in</a></div>
+</div>
+{% endblock %}

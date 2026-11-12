@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow"><svg class="icon"><use href="#i-zap"/></svg>For A-level and university students</span>
+      <h1>Fall behind? <span class="hl">Catch Up</span> and get ahead.</h1>
+      <p class="lead">Clear, step-by-step courses in Mathematics, Physics, Chemistry, Biology, Computer Science and Data Science. Taught by verified, TCZ-registered teachers, with live classes, continuous assessment and progress reports for parents.</p>
+      <div class="hero-actions">
+        <a href="{% url 'courses:catalog' %}" class="btn btn-primary btn-lg">Browse courses <svg class="icon"><use href="#i-arrow-right"/></svg></a>
+        {% if not user.is_authenticated %}<a href="{% url 'accounts:signup' %}" class="btn btn-outline btn-lg">Create a free account</a>{% else %}<a href="{% url 'core:dashboard' %}" class="btn btn-outline btn-lg">Go to my learning</a>{% endif %}
+      </div>
+      <div class="hero-proof">
+        <span><svg class="icon"><use href="#i-play"/></svg>Free preview lessons</span>
+        <span><svg class="icon"><use href="#i-wallet"/></svg>From K{{ COURSE_PRICE }} a month per course</span>
+        <span><svg class="icon"><use href="#i-phone"/></svg>MTN, Airtel &amp; Zamtel</span>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="book-stack">
+        {% for course in courses|slice:":3" %}<div class="book-stack-item n{{ forloop.counter }}">{% include 'partials/cover.html' with size='lg' %}</div>{% empty %}
+        <div class="book-stack-item n1"><div class="book-cover lg" style="--c:#0e7a4f"><span class="book-spine"></span><span class="book-text"><span class="book-kicker">Mathematics · A-level</span><span class="book-title">Pure Mathematics 1</span><span class="book-author">Verified tutor</span></span></div></div>
+        <div class="book-stack-item n2"><div class="book-cover lg" style="--c:#2563eb"><span class="book-spine"></span><span class="book-text"><span class="book-kicker">Physics · Year 1</span><span class="book-title">Mechanics</span><span class="book-author">Verified tutor</span></span></div></div>
+        <div class="book-stack-item n3"><div class="book-cover lg" style="--c:#c2410c"><span class="book-spine"></span><span class="book-text"><span class="book-kicker">Chemistry · A-level</span><span class="book-title">Organic Chemistry</span><span class="book-author">Verified tutor</span></span></div></div>
+        {% endfor %}
+      </div>
+      <div class="float-card one"><span class="dot" style="background:var(--brand)"><svg class="icon"><use href="#i-check"/></svg></span><span>Payment approved<br><span class="muted small">Course unlocked for 30 days</span></span></div>
+      <div class="float-card two"><span class="dot" style="background:var(--accent)"><svg class="icon"><use href="#i-award"/></svg></span><span>Quiz passed: 86%<br><span class="muted small">Next lesson open</span></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-strip">
+  <div class="container stats-row">
+    <div><strong data-count="{{ stats.courses }}">{{ stats.courses }}</strong><span>courses</span></div>
+    <div><strong data-count="{{ stats.tutors }}">{{ stats.tutors }}</strong><span>verified teachers</span></div>
+    <div><strong data-count="{{ stats.students }}">{{ stats.students }}</strong><span>students</span></div>
+    <div><strong data-count="{{ stats.schools }}">{{ stats.schools }}</strong><span>partner schools</span></div>
+  </div>
+</section>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Subjects</span><h2>Core subjects, one place to learn</h2></div>
+    <div class="grid grid-3">
+      {% for s in subjects %}
+      <a href="{% url 'courses:catalog' %}?subject={{ s.slug }}" class="card card-hover subject-card" data-reveal>
+        <span class="subject-icon" style="background:{{ s.colour }}"><svg class="icon"><use href="#i-{{ s.icon }}"/></svg></span>
+        <span><h3>{{ s.name }}</h3><p>{{ s.tagline }}</p></span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head center"><span class="eyebrow">Why Catch Up</span><h2>Built for understanding, not memorising</h2><p class="lead">Every lesson is structured the same way, so you always know where you are and what comes next.</p></div>
+    <div class="grid grid-4">
+      <div class="card feature" data-reveal><div class="feature-icon"><svg class="icon"><use href="#i-layers"/></svg></div><h3>Step-by-step lessons</h3><p>Ideas build in small steps with worked examples, so nothing feels like a jump.</p></div>
+      <div class="card feature" data-reveal><div class="feature-icon"><svg class="icon"><use href="#i-check-circle"/></svg></div><h3>Continuous assessment</h3><p>Short quizzes and problem sets after lessons. Pass them to unlock what comes next.</p></div>
+      <div class="card feature" data-reveal><div class="feature-icon"><svg class="icon"><use href="#i-video"/></svg></div><h3>Live classes and extra lessons</h3><p>Join your teacher's live classes, or book a one-to-one when you're stuck.</p></div>
+      <div class="card feature" data-reveal><div class="feature-icon"><svg class="icon"><use href="#i-phone"/></svg></div><h3>Works on any phone</h3><p>Lessons are light and readable on small screens and slow connections.</p></div>
+    </div>
+  </div>
+</section>
+
+{% if courses %}
+<section class="section-sm">
+  <div class="container">
+    <div class="row-between section-head" style="max-width:none"><div><span class="eyebrow">Courses</span><h2 style="margin:0">Start with a free preview</h2></div><a href="{% url 'courses:catalog' %}" class="btn btn-outline">See all courses <svg class="icon"><use href="#i-arrow-right"/></svg></a></div>
+    <div class="grid grid-3">{% for course in courses %}{% include 'partials/course_card.html' %}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:center;gap:48px">
+      <div>
+        <span class="eyebrow">How it works</span>
+        <h2>From sign-up to studying in two minutes</h2>
+        <p class="lead">No cards, no bank account. Pay from your phone with the mobile money wallet you already use.</p>
+        <div class="network-strip" style="margin-top:20px">
+          <span class="net-chip net-MTN"><i></i>MTN MoMo</span><span class="net-chip net-AIRTEL"><i></i>Airtel Money</span><span class="net-chip net-ZAMTEL"><i></i>Zamtel Money</span>
+        </div>
+      </div>
+      <div class="grid steps">
+        <div class="card step" data-reveal><h3>Create a free account</h3><p class="muted" style="margin:0">Open the free preview lesson in any course straight away.</p></div>
+        <div class="card step" data-reveal><h3>Subscribe with mobile money</h3><p class="muted" style="margin:0">Enter your number, type your PIN when the prompt arrives, and the course unlocks straight away. We email your receipt.</p></div>
+        <div class="card step" data-reveal><h3>Learn at your own pace</h3><p class="muted" style="margin:0">Join live classes, take the quiz after each lesson, and book extra help when you need it. Renew monthly, stop any time.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head center"><span class="eyebrow">One platform, four portals</span><h2>Everyone gets their own space</h2></div>
+    <div class="portal-grid">
+      <a href="{% url 'portal:student_login' %}" class="card portal-card portal-student" data-reveal><span class="portal-icon"><svg class="icon"><use href="#i-graduation"/></svg></span><h3>Students</h3><p>Lessons, live classes, quizzes, grades and a study coach that keeps you on track.</p><span class="portal-go">Student login <svg class="icon"><use href="#i-arrow-right"/></svg></span></a>
+      <a href="{% url 'portal:parent_login' %}" class="card portal-card portal-parent" data-reveal><span class="portal-icon"><svg class="icon"><use href="#i-heart"/></svg></span><h3>Parents</h3><p>Link to your child, see attendance and marks, get alerts, and pay their courses.</p><span class="portal-go">Parent login <svg class="icon"><use href="#i-arrow-right"/></svg></span></a>
+      <a href="{% url 'portal:tutor_login' %}" class="card portal-card portal-tutor" data-reveal><span class="portal-icon"><svg class="icon"><use href="#i-briefcase"/></svg></span><h3>Teachers</h3><p>Upload PowerPoint, Word, PDF and HTML, teach live, grade, and keep 50% of every subscription.</p><span class="portal-go">Teacher login <svg class="icon"><use href="#i-arrow-right"/></svg></span></a>
+      <a href="{% url 'schools:index' %}" class="card portal-card portal-admin" data-reveal><span class="portal-icon"><svg class="icon"><use href="#i-grid"/></svg></span><h3>Schools</h3><p>Your own teachers, students and private courses with timetables, registers and gradebooks.</p><span class="portal-go">Set up your school <svg class="icon"><use href="#i-arrow-right"/></svg></span></a>
+    </div>
+  </div>
+</section>
+
+{% if tutors %}
+<section class="section-sm">
+  <div class="container">
+    <div class="row-between section-head" style="max-width:none"><div><span class="eyebrow">Verified teachers</span><h2 style="margin:0">Learn from qualified specialists</h2></div><a href="{% url 'portal:tutors' %}" class="btn btn-outline">All teachers <svg class="icon"><use href="#i-arrow-right"/></svg></a></div>
+    <div class="grid grid-4">
+      {% for t in tutors %}
+      <a href="{% url 'portal:tutor_profile' t.pk %}" class="card card-hover tutor-card" data-reveal>{% if t.photo %}<img src="{{ t.photo.url }}" alt="" class="avatar-img lg" loading="lazy">{% else %}<span class="avatar">{{ t.initials }}</span>{% endif %}<h3>{{ t.display_name }} <span class="verified" title="Verified: TCZ registered"><svg class="icon"><use href="#i-check-circle"/></svg></span></h3><p>{{ t.headline|default:"Verified teacher" }}</p><span class="muted small">{{ t.course_count }} course{{ t.course_count|pluralize }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="container">
+    <div class="grid grid-2 split-band">
+      <div class="card card-pad" data-reveal>
+        <span class="eyebrow">For parents</span>
+        <h2>Know how your child is really doing</h2>
+        <p class="muted">Your child shares their invite code. You see their lessons, attendance, marks and our early-warning signals, and you can pay for their courses from your own phone.</p>
+        <a href="{% url 'portal:parent_signup' %}" class="btn btn-primary">Create a parent account</a>
+      </div>
+      <div class="card card-pad" data-reveal>
+        <span class="eyebrow">For teachers</span>
+        <h2>Teach what you know. Earn every month.</h2>
+        <p class="muted">Registered with TCZ and hold a degree? Get verified, publish your courses, and receive 50% of every subscription to your mobile money wallet.</p>
+        <a href="{% url 'portal:tutor_signup' %}" class="btn btn-accent">Apply to teach</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <div><h2>Your next exam starts today.</h2><p>Open any course and read the first lesson free. No payment needed to start.</p></div>
+      <a href="{% if user.is_authenticated %}{% url 'courses:catalog' %}{% else %}{% url 'accounts:signup' %}{% endif %}" class="btn btn-accent btn-lg">Start learning free <svg class="icon"><use href="#i-arrow-right"/></svg></a>
+    </div>
+  </div>
+</section>
+{% endblock %}

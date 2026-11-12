@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Schools and universities · Catch Up{% endblock %}
+{% block content %}
+<section class="section hero-soft">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:center">
+      <div data-reveal>
+        <span class="eyebrow">For schools and universities</span>
+        <h1 style="font-size:clamp(2rem,4.4vw,3rem)">Run your school's teaching on Catch Up</h1>
+        <p class="lead">Your own teachers, students and private courses. Timetabled live classes, attendance registers, continuous assessment, gradebooks, and reports that go to parents automatically.</p>
+        <div class="row" style="flex-wrap:wrap;gap:10px">
+          <a href="{% url 'schools:register' %}" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-graduation"/></svg>Set up your school</a>
+          <a href="#join" class="btn btn-outline btn-lg">I have a join code</a>
+        </div>
+        <ul class="check-list" style="margin-top:22px">
+          <li><svg class="icon"><use href="#i-check"/></svg>Free trial, no card needed</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Teachers upload PowerPoint, Word, PDF and HTML lessons</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Works on any phone, even on slow data</li>
+        </ul>
+      </div>
+      <div class="feature-stack" data-reveal>
+        <div class="card card-pad feature-row"><span class="portal-icon portal-tutor"><svg class="icon"><use href="#i-calendar"/></svg></span><div><strong>Timetable and live classes</strong><p class="muted small">Schedule classes with a Meet or Zoom link. Students check in with a 4-digit code.</p></div></div>
+        <div class="card card-pad feature-row"><span class="portal-icon portal-student"><svg class="icon"><use href="#i-clipboard"/></svg></span><div><strong>Attendance and gradebooks</strong><p class="muted small">Registers, weighted continuous assessment and CSV exports for your records.</p></div></div>
+        <div class="card card-pad feature-row"><span class="portal-icon portal-parent"><svg class="icon"><use href="#i-heart"/></svg></span><div><strong>Parents kept in the loop</strong><p class="muted small">Parents link to their child and get marks, attendance and announcements.</p></div></div>
+        <div class="card card-pad feature-row"><span class="portal-icon portal-admin"><svg class="icon"><use href="#i-chart"/></svg></span><div><strong>Early warning</strong><p class="muted small">Our model flags students at risk of falling behind, so teachers can step in early.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="join">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:start">
+      <div class="card card-pad" data-reveal>
+        <h2 class="card-title">Join your school</h2>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'schools:join' %}" novalidate>{% csrf_token %}{% with form=join_form %}{% include 'partials/form_fields.html' %}{% endwith %}<button class="btn btn-primary btn-block">Join</button></form>
+        {% else %}
+        <p class="muted">Create a free account (or log in), then enter the code your school gave you.</p>
+        <div class="row"><a class="btn btn-primary" href="{% url 'accounts:signup' %}?next={% url 'schools:index' %}%23join">Create account</a><a class="btn btn-outline" href="{% url 'accounts:login' %}?next={% url 'schools:index' %}%23join">Log in</a></div>
+        {% endif %}
+      </div>
+      <div data-reveal>
+        <h2 class="card-title">Schools on Catch Up</h2>
+        <div class="school-list">
+          {% for s in schools %}
+          <a class="card school-card" href="{{ s.get_absolute_url }}">
+            {% if s.logo %}<img src="{{ s.logo.url }}" alt="" class="school-logo" loading="lazy">{% else %}<span class="school-logo school-initial">{{ s.name|first }}</span>{% endif %}
+            <span><strong>{{ s.name }}</strong><span class="muted small">{{ s.get_kind_display }}{% if s.town %} · {{ s.town }}{% endif %} · {{ s.n }} member{{ s.n|pluralize }}</span></span>
+            <svg class="icon"><use href="#i-chevron-right"/></svg>
+          </a>
+          {% empty %}<p class="muted">Be the first school in your town on Catch Up.</p>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

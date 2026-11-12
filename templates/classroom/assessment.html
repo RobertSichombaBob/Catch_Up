@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ a.title }} · Catch Up{% endblock %}
+{% block head %}{% include 'partials/katex.html' %}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:820px">
+  <div class="page-head">
+    <a href="{% if a.lesson %}{% url 'courses:lesson' a.course.slug a.lesson.pk %}{% else %}{{ a.course.get_absolute_url }}{% endif %}" class="small">&larr; {% if a.lesson %}{{ a.lesson.title }}{% else %}{{ a.course.title }}{% endif %}</a>
+    <span class="eyebrow">{{ a.get_kind_display }}</span>
+    <h1>{{ a.title }}</h1>
+    <div class="small-kpis">
+      <span><svg class="icon"><use href="#i-clipboard"/></svg>{{ questions|length }} question{{ questions|length|pluralize }}</span>
+      <span><svg class="icon"><use href="#i-target"/></svg>Pass mark {{ a.pass_mark }}%</span>
+      {% if a.time_limit_minutes %}<span><svg class="icon"><use href="#i-clock"/></svg>{{ a.time_limit_minutes }} minutes</span>{% endif %}
+      {% if a.due_at %}<span><svg class="icon"><use href="#i-calendar"/></svg>Due {{ a.due_at|date:"j M, H:i" }}</span>{% endif %}
+      <span><svg class="icon"><use href="#i-zap"/></svg>{{ left }} attempt{{ left|pluralize }} left</span>
+    </div>
+  </div>
+  {% if manager and not a.is_published %}<div class="alert alert-info">Draft preview. Students can't see this yet.</div>{% endif %}
+  {% if previous %}
+  <div class="card card-pad" style="margin-bottom:20px">
+    <h3 class="card-title">Your attempts</h3>
+    <ul class="plain-list">{% for s in previous %}<li><a href="{% url 'classroom:result' s.pk %}">Attempt {{ s.attempt }} · {{ s.submitted_at|date:"j M H:i" }}</a>{% if s.percent is not None %}<span class="{% if s.passed %}pos{% else %}neg{% endif %}"><strong>{{ s.percent }}%</strong></span>{% else %}<span class="muted small">{{ s.get_status_display }}</span>{% endif %}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  {% if left > 0 or manager %}
+  <form method="post" enctype="multipart/form-data" class="card card-pad"{% if a.time_limit_minutes %} data-timer="{{ a.time_limit_minutes }}"{% endif %}>{% csrf_token %}
+    {% if a.instructions %}<div class="prose math" style="margin-bottom:16px">{{ a.instructions|linebreaks }}</div>{% endif %}
+    {% if a.time_limit_minutes %}<div class="timer-bar" data-timer-display>{{ a.time_limit_minutes }}:00</div>{% endif %}
+    {% for q in questions %}
+    <fieldset class="assess-box">
+      <legend><strong>Question {{ forloop.counter }}</strong> <span class="muted small">· {{ q.marks }} mark{{ q.marks|pluralize }}</span></legend>
+      <div class="q-text math">{{ q.text|linebreaksbr }}</div>
+      {% if q.kind == 'mcq' %}
+        <div class="choice-list">{% for c in q.choice_list %}<label class="choice"><input type="radio" name="q_{{ q.pk }}" value="{{ forloop.counter }}"><span class="math">{{ c }}</span></label>{% endfor %}</div>
+      {% elif q.kind == 'numeric' %}
+        <input class="input" type="text" inputmode="decimal" name="q_{{ q.pk }}" placeholder="Your answer" autocomplete="off" style="max-width:240px">
+      {% elif q.kind == 'short' %}
+        <input class="input" type="text" name="q_{{ q.pk }}" placeholder="Your answer" autocomplete="off">
+      {% else %}
+        <textarea name="q_{{ q.pk }}" rows="5" placeholder="Show your working"></textarea>
+      {% endif %}
+    </fieldset>
+    {% endfor %}
+    {% if a.allow_file_upload %}
+    <div class="assess-box upload-card"><label for="up"><strong>Upload your worked solutions</strong> <span class="muted small">(PDF, Word, or a photo; up to 25 MB)</span></label><input id="up" type="file" name="upload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"></div>
+    {% endif %}
+    <button class="btn btn-primary btn-lg btn-block" data-confirm-submit="Submit your answers? You can't change them afterwards.">Submit answers</button>
+  </form>
+  {% else %}
+  <div class="card card-pad empty-state"><svg class="icon icon-lg"><use href="#i-lock"/></svg><h3>No attempts left</h3><p class="muted">Ask your tutor if you need another attempt.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

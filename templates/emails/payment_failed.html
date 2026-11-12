@@ -1,0 +1,9 @@
+{% extends 'emails/base_email.html' %}
+{% block body %}
+<h1 style="font-size:22px;color:#0d1b2a;margin:0 0 12px;">Your payment didn't go through</h1>
+<p style="margin:0 0 12px;">Hi {{ user.first_name|default:"there" }}, we couldn't complete your payment for <strong>{{ course.title }}</strong>.</p>
+<p style="margin:0 0 12px;"><strong>Reason:</strong> {{ payment.failure_message|default:"The payment was not completed." }}</p>
+<p style="margin:0 0 12px;">No money was taken. You can try again at any time.</p>
+{% include 'emails/_button.html' with href=action_url label="Try again" %}
+<p style="margin:0;font-size:13px;color:#5c677d;">Reference: {{ payment.reference }}</p>
+{% endblock %}

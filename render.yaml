@@ -1,0 +1,122 @@
+# Render Blueprint for Catch Up: web service + Postgres + persistent disk for
+# uploads + four cron jobs. In Render: New > Blueprint > pick this repository.
+# You will be asked for every value marked "sync: false".
+databases:
+  - name: catchup-db
+    databaseName: catchup
+    user: catchup
+    plan: basic-256mb          # paid (about $6/month). "free" expires after 30 days.
+    postgresMajorVersion: "16"
+
+envVarGroups:
+  # Shared by the web service and the cron jobs.
+  - name: catchup-settings
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: SITE_URL           # e.g. https://catchup.onrender.com or your own domain; used in emails
+        sync: false
+      # --- Payments: start in demo mode, switch to pawapay when your account is live ---
+      - key: PAYMENT_PROVIDER
+        value: simulator
+      - key: ALLOW_PAYMENT_SIMULATOR
+        value: "true"
+      - key: PAWAPAY_SANDBOX
+        value: "true"
+      - key: PAWAPAY_API_TOKEN
+        sync: false
+      - key: PAYMENT_FEE_PERCENT  # pawaPay's fee, taken off before the 50/50 split
+        value: "0"
+      - key: TUTOR_SHARE_PERCENT
+        value: "50"
+      - key: COURSE_PRICE_ZMW
+        value: "80.00"
+      - key: PAYOUT_MINIMUM
+        value: "100"
+      # --- Email (Gmail app password, Brevo, Mailgun, SendGrid...) ---
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+
+services:
+  - type: web
+    name: catchup
+    runtime: python
+    plan: starter              # a persistent disk needs a paid plan (about $7/month)
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --workers 3 --timeout 120 --access-logfile -
+    healthCheckPath: /healthz
+    disk:
+      name: catchup-media
+      mountPath: /var/data
+      sizeGB: 5                # uploaded notes, slides, certificates and photos
+    envVars:
+      - fromGroup: catchup-settings
+      - key: DATABASE_URL
+        fromDatabase: { name: catchup-db, property: connectionString }
+      - key: MEDIA_ROOT
+        value: /var/data/media
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      - key: SEED_ACCOUNT_PASSWORD
+        sync: false
+
+  # Cron jobs don't touch uploaded files, so they don't need the disk.
+  - type: cron
+    name: catchup-reminders
+    runtime: python
+    schedule: "*/15 * * * *"   # class reminders and renewal reminders
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py send_reminders
+    envVars:
+      - fromGroup: catchup-settings
+      - key: DATABASE_URL
+        fromDatabase: { name: catchup-db, property: connectionString }
+
+  - type: cron
+    name: catchup-pending-payments
+    runtime: python
+    schedule: "*/10 * * * *"   # settle payments whose callback never arrived
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py check_pending_payments
+    envVars:
+      - fromGroup: catchup-settings
+      - key: DATABASE_URL
+        fromDatabase: { name: catchup-db, property: connectionString }
+
+  - type: cron
+    name: catchup-train-models
+    runtime: python
+    schedule: "0 1 * * *"      # 03:00 Lusaka time: retrain the dropout-risk model
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py train_models
+    envVars:
+      - fromGroup: catchup-settings
+      - key: DATABASE_URL
+        fromDatabase: { name: catchup-db, property: connectionString }
+
+  - type: cron
+    name: catchup-payouts
+    runtime: python
+    schedule: "0 6 1 * *"      # 1st of each month: prepare tutor payouts for admin approval
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py create_payouts
+    envVars:
+      - fromGroup: catchup-settings
+      - key: DATABASE_URL
+        fromDatabase: { name: catchup-db, property: connectionString }

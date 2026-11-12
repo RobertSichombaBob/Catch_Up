@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}{{ group.name|default:"New class" }} · Catch Up{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px">
+  <div class="page-head"><a href="{% url 'classroom:manage' course.slug %}" class="small">&larr; {{ course.title }}</a><h1>{{ group.name|default:"New class" }}</h1></div>
+  <form method="post" class="grid grid-2" style="align-items:start;margin:18px 0 56px">{% csrf_token %}
+    <div class="card card-pad">{% include 'partials/form_fields.html' %}<button class="btn btn-primary">Save class</button>{% if group %} <a class="btn btn-outline" href="{% url 'classroom:session_new' course.slug %}?group={{ group.pk }}">Schedule a session</a>{% endif %}</div>
+    <div class="card card-pad">
+      <h3>Students</h3>
+      <ul class="plain-list">{% for m in members %}<li><span>{{ m.display_name }}</span><button class="btn btn-sm btn-ghost" formaction="{% url 'classroom:group_remove' course.slug group.pk m.pk %}" formnovalidate>Remove</button></li>{% empty %}<li class="muted small">No students in this class yet.</li>{% endfor %}</ul>
+      {% if candidates %}<h4 style="margin-top:16px">Add subscribed students</h4>
+      <div class="check-grid">{% for c in candidates %}<label class="field-check"><input type="checkbox" name="add_students" value="{{ c.pk }}"> {{ c.display_name }}</label>{% endfor %}</div>{% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

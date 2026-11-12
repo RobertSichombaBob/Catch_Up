@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Pricing · Catch Up{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head center"><span class="eyebrow">Pricing</span><h1 style="font-size:clamp(2rem,4vw,2.8rem)">Simple monthly prices</h1><p class="lead">Subscribe to the courses you need, one month at a time. No contracts, no card needed: pay with mobile money.</p></div>
+    <div class="grid grid-3">
+      <div class="card price-card" data-reveal>
+        <h3>Free account</h3>
+        <div class="price-big">K0</div>
+        <ul class="check-list">
+          <li><svg class="icon"><use href="#i-check"/></svg>Free preview lesson in every course</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Browse verified tutors</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Parents can link and follow children</li>
+        </ul>
+        <a href="{% url 'accounts:signup' %}" class="btn btn-outline btn-block">Create free account</a>
+      </div>
+      <div class="card price-card featured" data-reveal>
+        <span class="badge badge-accent" style="position:absolute;top:20px;right:20px">Most popular</span>
+        <h3>Course subscription</h3>
+        <div class="price-big">K{{ COURSE_PRICE }} <small>per course / month</small></div>
+        <ul class="check-list">
+          <li><svg class="icon"><use href="#i-check"/></svg>Every lesson, note, slide and tutorial sheet</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Live classes and extra lessons with your teacher</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Continuous assessment, grades and feedback</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Progress reports for parents</li>
+        </ul>
+        <a href="{% url 'courses:catalog' %}" class="btn btn-primary btn-block">Choose a course</a>
+        <p class="small muted" style="margin:12px 0 0">Prices are set by each teacher, from K{{ COURSE_PRICE }} for most courses.</p>
+      </div>
+      <div class="card price-card" data-reveal>
+        <h3>Schools and universities</h3>
+        <div class="price-big" style="font-size:2rem">Free trial</div>
+        <ul class="check-list">
+          <li><svg class="icon"><use href="#i-check"/></svg>Your own teachers, students and private courses</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>Timetabled classes, attendance and gradebooks</li>
+          <li><svg class="icon"><use href="#i-check"/></svg>School dashboard and parent notifications</li>
+        </ul>
+        <a href="{% url 'schools:index' %}" class="btn btn-outline btn-block">Set up your school</a>
+      </div>
+    </div>
+    <div class="card card-pad" style="margin-top:28px;max-width:860px;margin-left:auto;margin-right:auto" data-reveal>
+      <h3>Teaching on Catch Up</h3>
+      <p class="muted" style="margin:0">Verified teachers keep <strong>50% of every subscription</strong> to their courses, after payment fees, paid monthly to their mobile money wallet. <a href="{% url 'portal:tutor_signup' %}">Apply to teach</a>.</p>
+    </div>
+    <div class="network-strip" style="justify-content:center;margin-top:32px">
+      <span class="net-chip net-MTN"><i></i>MTN MoMo</span><span class="net-chip net-AIRTEL"><i></i>Airtel Money</span><span class="net-chip net-ZAMTEL"><i></i>Zamtel Money</span>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'emails/base_email.html' %}
+{% block body %}
+<h1 style="font-size:22px;color:#0d1b2a;margin:0 0 12px;">Welcome to Catch Up, {{ user.first_name|default:"there" }}!</h1>
+<p style="margin:0 0 12px;">Your account is ready. Here is how to get going:</p>
+<ol style="margin:0 0 12px;padding-left:20px;">
+  <li style="margin-bottom:6px;">Pick a course in Mathematics, Physics, Chemistry, Biology, Computer Science or Data Science.</li>
+  <li style="margin-bottom:6px;">Read the free preview lesson.</li>
+  <li style="margin-bottom:6px;">Unlock the full course with MTN, Airtel or Zamtel mobile money.</li>
+</ol>
+{% include 'emails/_button.html' with href=action_url label="Browse courses" %}
+{% endblock %}

@@ -1,0 +1,10 @@
+Hi {{ user.first_name|default:"there" }},
+
+{{ title }}
+
+{{ body }}
+{% if action_url %}
+Open: {{ action_url }}{% endif %}
+
+Catch Up · {{ site_url }}
+Turn off email notifications: {{ site_url }}/accounts/profile/
